@@ -335,9 +335,19 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderCaseTable() {
     if (!caseTbody) return;
     caseTbody.innerHTML = casesData.map(c => {
-      const storedPath = c.supporting_docs || c.file_url;
-      const publicUrl = resolveCaseFileUrl(storedPath);
-      const fileLink = publicUrl ? `<a class="file-link" href="${publicUrl}" target="_blank" onclick="event.stopPropagation()">View File</a>` : "No File";
+      const storedPath = c.supporting_docs || c.file_url || "";
+      let fileLink = "No File";
+      if (storedPath) {
+        const urls = storedPath.split(',').filter(x => x.trim());
+        if (urls.length > 0) {
+          const firstUrl = resolveCaseFileUrl(urls[0].trim());
+          if (urls.length === 1 && firstUrl) {
+            fileLink = `<a class="file-link" href="${firstUrl}" target="_blank" onclick="event.stopPropagation()">View File</a>`;
+          } else if (urls.length > 1) {
+            fileLink = `<span style="color:#0a84ff;">${urls.length} Files</span>`;
+          }
+        }
+      }
       return `
       <tr style="cursor:pointer;" onclick="openCaseModal(${c.id})">
         <td>${c.transcode || "-"}</td>
@@ -364,11 +374,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const fileLinkEl = document.getElementById("detail_file_link");
     if (fileLinkEl) {
-      const storedPath = c.supporting_docs || c.file_url;
-      const publicUrl = resolveCaseFileUrl(storedPath);
-      fileLinkEl.innerHTML = publicUrl
-        ? `<a class="file-link" href="${publicUrl}" target="_blank">View / Download File</a>`
-        : "No file attached";
+      const docsUrls = c.supporting_docs || c.file_url || "";
+      if (docsUrls) {
+        const urlArray = docsUrls.split(',').map(u => u.trim()).filter(u => u);
+        if (urlArray.length > 0) {
+          fileLinkEl.innerHTML = '';
+          urlArray.forEach(url => {
+            const publicUrl = resolveCaseFileUrl(url);
+            if (!publicUrl) return;
+            const fileName = publicUrl.split("/").pop() || "file";
+            const decodedName = decodeURIComponent(fileName);
+            const shortName = decodedName.replace(/^\\d+_(?:\\d+_)?/, "");
+            fileLinkEl.innerHTML += `
+              <div style="margin-bottom: 6px;">
+                <a class="file-link" href="${publicUrl}" target="_blank">📎 ${shortName}</a>
+              </div>
+            `;
+          });
+        } else {
+          fileLinkEl.textContent = "No file attached";
+        }
+      } else {
+        fileLinkEl.textContent = "No file attached";
+      }
     }
 
     caseModal.style.display = "flex";
