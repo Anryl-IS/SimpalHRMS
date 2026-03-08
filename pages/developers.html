@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://i.imgur.com/6SF5KQG.png">
+  <title>About the Developers</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+    /* Basic Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'SF Pro Display', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px 20px;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 50px;
+      text-align: center;
+      background: linear-gradient(90deg, #ff6a00, #ee0979);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: glow 2s infinite alternate;
+    }
+
+    @keyframes glow {
+      0% { text-shadow: 0 0 5px #ff6a00, 0 0 10px #ee0979; }
+      100% { text-shadow: 0 0 20px #ff6a00, 0 0 30px #ee0979; }
+    }
+
+    .developers-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+      justify-content: center;
+    }
+
+    .developer-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      width: 280px;
+      padding: 30px 20px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.5s, box-shadow 0.5s;
+    }
+
+    .developer-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, #ff6a00, #ee0979, #ff6a00, #ee0979);
+      animation: rotate 6s linear infinite;
+      z-index: 0;
+      opacity: 0.3;
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .developer-card:hover {
+      transform: translateY(-15px) scale(1.05);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    }
+
+    .developer-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .developer-photo {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background-color: #fff;
+      margin: 0 auto 20px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #ff6a00;
+      font-weight: 700;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .developer-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, #ff6a00, #ee0979);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .developer-role {
+      font-size: 1rem;
+      color: #ddd;
+      margin-bottom: 15px;
+    }
+
+    .developer-bio {
+      font-size: 0.95rem;
+      line-height: 1.4;
+      color: #ccc;
+      margin-bottom: 20px;
+    }
+
+    .social-links a {
+      text-decoration: none;
+      color: #ff6a00;
+      margin: 0 10px;
+      font-size: 1.2rem;
+      transition: transform 0.3s, color 0.3s;
+    }
+
+    .social-links a:hover {
+      transform: scale(1.3);
+      color: #ee0979;
+    }
+
+    @media (max-width: 900px) {
+      .developers-container {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Meet the Developers</h1>
+
+  <div class="developers-container">
+
+    <div class="developer-card">
+      <div class="developer-content">
+        <div class="developer-photo">EA</div>
+        <div class="developer-name">Edwin Angelo Catequista</div>
+        <div class="developer-role">Frontend Developer</div>
+                <div class="developer-bio">Enjoys building complete applications from frontend to backend. Focused on performance and scalability.</div>
+        <div class="social-links">
+          <a href="#" target="_blank">👉</a>
+          <a href="#" target="_blank">👌</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="developer-card">
+      <div class="developer-content">
+        <div class="developer-photo">JR</div>
+        <div class="developer-name">Jay Ryan Lim</div>
+        <div class="developer-role">Backend Developer</div>
+        <div class="developer-bio">Specializes in server-side logic, database management, and APIs. Loves solving complex problems.</div>
+        <div class="social-links">
+          <a href="#" target="_blank">💻</a>
+          <a href="#" target="_blank">🐦</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="developer-card">
+      <div class="developer-content">
+        <div class="developer-photo">KL</div>
+        <div class="developer-name">Kevin Levbrillo</div>
+        <div class="developer-role">Frontend Developer</div>
+                <div class="developer-bio">Passionate about clean UI/UX and modern web designs. Loves coding interactive interfaces.</div>
+        <div class="social-links">
+          <a href="#" target="_blank">💻</a>
+          <a href="#" target="_blank">🐦</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

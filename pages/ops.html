@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ops HR Dashboard - Simpal HRMS</title>
+  <link rel="icon" type="image/png" href="https://i.imgur.com/6SF5KQG.png">
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+  <link rel="stylesheet" href="../css/ops.css">
+
+</head>
+
+<body>
+  <aside class="sidebar">
+    <div class="logo-circle"><img src="https://i.imgur.com/6SF5KQG.png" alt="logo"></div>
+    <h2>Operations Associate Dashboard</h2>
+    <nav class="nav">
+      <button class="tab-btn active" data-tab="employeeTab">Employees</button>
+      <button class="tab-btn" data-tab="addEmployeeTab">Add New Employee</button>
+    </nav>
+    <button id="logoutBtn">Logout</button>
+  </aside>
+
+  <div class="loader-overlay" id="loader" aria-hidden="true">
+    <div class="spinner" role="status" aria-hidden="true"></div>
+    <p id="loaderTxt">Loading...</p>
+  </div>
+
+  <div class="main">
+    <h1>Operations Associate Dashboard</h1>
+
+    <div id="employeeTab" class="tab-content active">
+      <h2>Employee Database</h2>
+      <div class="emp-table-actions">
+        <input id="empSearch" class="search-input" placeholder="Search name, position, email or mobile...">
+        <div style="color:#9b9b9b;font-size:13px;" id="empCount">Records loaded.</div>
+      </div>
+      <div class="emp-table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Position</th>
+              <th>Email</th>
+              <th>Mobile</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="dbTbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="addEmployeeTab" class="tab-content">
+      <form id="addEmpForm" enctype="multipart/form-data" class="add-employee-form">
+        <h2>Add New Employee</h2>
+
+        <input id="emp_name_english" placeholder="Full Name" required />
+        <select id="emp_sex">
+          <option value="">Select Sex</option>
+          <option>Male</option>
+          <option>Female</option>
+        </select>
+        <input id="emp_blood_type" placeholder="Blood Type (e.g., O, A, B)" />
+        <label for="emp_dob">Date of Birth:</label>
+        <input id="emp_dob" type="date" />
+        <input id="emp_height" placeholder="Height (cm)" type="number" />
+        <input id="emp_weight" placeholder="Weight (kg)" type="number" />
+        <input id="emp_position" placeholder="Position" />
+
+        <label for="emp_designation">Designation:</label>
+        <select id="emp_designation" required>
+          <option value="">Select Designation</option>
+          <option value="LDS">LDS</option>
+          <option value="LDN">LDN</option>
+          <option value="MDS">MDS</option>
+          <option value="MDN">MDN</option>
+          <option value="COT">COT</option>
+          <option value="ADMIN">ADMIN</option>
+        </select>
+
+        <input id="emp_sss" placeholder="SSS Number" />
+        <input id="emp_philhealth" placeholder="PhilHealth Number" />
+        <input id="emp_pagibig" placeholder="Pag-IBIG Number" />
+        <input id="emp_id_card" placeholder="ID Card Number" />
+        <input id="emp_email" placeholder="Email" type="email" />
+        <input id="emp_mobile" placeholder="Mobile Number" />
+        <input id="emp_residence_address" placeholder="Residence Address" />
+        <input id="emp_residence_postal" placeholder="Residence Postal Code" />
+        <input id="emp_present_address" placeholder="Present Address" />
+        <input id="emp_present_postal" placeholder="Present Postal Code" />
+
+        <label for="emp_photo">Upload Employee Photo:</label>
+        <input id="emp_photo" type="file" accept="image/*" required />
+        <img id="photoPreview" alt="Photo Preview" />
+
+        <label for="emp_201file">Upload 201 File (PDF, DOCX, etc.):</label>
+        <input id="emp_201file" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png" required />
+
+        <button type="submit">Add Employee</button>
+      </form>
+    </div>
+
+    <div class="watermark">Designed & Developed By : Edwin Angelo Catequista</div>
+  </div>
+
+  <div id="empModal" class="modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="empModalTitle">
+      <button class="closeBtn" id="closeEmpModal" aria-label="Close modal">&times;</button>
+
+      <h2 id="empModalTitle">Employee Profile</h2>
+
+      <div class="employee-profile">
+        <img id="empPhoto" class="photo" src="" alt="Employee photo" />
+      </div>
+
+      <div class="employee-grid">
+        <section aria-label="Personal Information">
+          <div class="profile-row">
+            <div class="profile-label">Name</div>
+            <div class="profile-value" id="emp_name_english_modal"></div>
+          </div>
+          <div class="profile-row">
+            <div class="profile-label">Position</div>
+            <div class="profile-value" id="emp_position_modal"></div>
+          </div>
+          <div class="profile-row">
+            <div class="profile-label">Sex</div>
+            <div class="profile-value" id="emp_sex_modal"></div>
+          </div>
+          <div class="profile-row">
+            <div class="profile-label">Blood Type</div>
+            <div class="profile-value" id="emp_blood_type_modal"></div>
+          </div>
+          <div class="profile-row">
+            <div class="profile-label">DOB</div>
+            <div class="profile-value" id="emp_dob_modal"></div>
+          </div>
+          <div class="profile-row">
+            <div class="profile-label">Height</div>
+            <div class="profile-value" id="emp_height_modal"></div>
+          </div>
+        </section>
+
+        <section aria-label="Contact & Education">
+          <div class="profile-row">
+            <div class="profile-label">Weight</div>
+            <div class="profile-value" id="emp_weight_modal"></div>
+          </div>
+          <div class="profile-row">
+            <div class="profile-label">ID No.</div>
+            <div class="profile-value" id="emp_id_card_modal"></div>
+          </div>
+          <div class="profile-row">
+            <div class="profile-label">Email</div>
+            <div class="profile-value" id="emp_email_modal"></div>
+          </div>
+          <div class="profile-row">
+            <div class="profile-label">Mobile</div>
+            <div class="profile-value" id="emp_mobile_modal"></div>
+          </div>
+        </section>
+
+        <section aria-label="Address & Metadata">
+          <div class="profile-row">
+            <div class="profile-label">Created At</div>
+            <div class="profile-value" id="emp_created_at_modal"></div>
+          </div>
+          <div class="profile-row">
+            <div class="profile-label">SSS Number</div>
+            <div class="profile-value" id="emp_sss_modal"></div>
+          </div>
+          <div class="profile-row">
+            <div class="profile-label">PhilHealth Number</div>
+            <div class="profile-value" id="emp_philhealth_modal"></div>
+          </div>
+          <div class="profile-row">
+            <div class="profile-label">Pag-IBIG Number</div>
+            <div class="profile-value" id="emp_pagibig_modal"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+  <div id="addEmpLoader" class="loader-add-emp">
+    <div class="spinner-add-emp"></div>
+    <div id="addEmpLoaderTxt">Processing...</div>
+  </div>
+
+  <script>
+
+    if (sessionStorage.getItem("role") !== "ops") {
+
+    }
+
+
+    const SUPABASE_URL = "https://hzafznqoyinfjbqrrerp.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6YWZ6bnFveWluZmpicXJyZXJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MDYzMzcsImV4cCI6MjA3NjA4MjMzN30.qQFFQ6fzqBXxl63JG4JWNZ0JR0ZVnoyiU65J4VlDNG8";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+    const loader = document.getElementById("loader");
+    const loaderTxt = document.getElementById("loaderTxt");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+
+    const tabBtns = document.querySelectorAll(".tab-btn");
+    const contents = document.querySelectorAll(".tab-content");
+    tabBtns.forEach(btn => btn.onclick = () => {
+      tabBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      contents.forEach(c => c.classList.remove("active"));
+      document.getElementById(btn.dataset.tab).classList.add("active");
+    });
+
+
+    logoutBtn.onclick = () => {
+      loaderTxt.textContent = "Logging out, please wait...";
+      loader.classList.add("active");
+      setTimeout(() => {
+        sessionStorage.clear();
+        window.location.href = "../index.html";
+      }, 1500);
+    };
+
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+
+    let employeesCache = [];
+
+
+    const dbTbody = document.getElementById("dbTbody");
+    const empSearch = document.getElementById("empSearch");
+    const empModal = document.getElementById("empModal");
+    const closeEmpModal = document.getElementById("closeEmpModal");
+    const empCount = document.getElementById("empCount");
+
+
+    const emp_name_english_modal = document.getElementById("emp_name_english_modal");
+    const emp_position_modal = document.getElementById("emp_position_modal");
+    const emp_sex_modal = document.getElementById("emp_sex_modal");
+    const emp_blood_type_modal = document.getElementById("emp_blood_type_modal");
+    const emp_dob_modal = document.getElementById("emp_dob_modal");
+    const emp_height_modal = document.getElementById("emp_height_modal");
+    const emp_weight_modal = document.getElementById("emp_weight_modal");
+    const emp_id_card_modal = document.getElementById("emp_id_card_modal");
+    const emp_email_modal = document.getElementById("emp_email_modal");
+    const emp_mobile_modal = document.getElementById("emp_mobile_modal");
+    const emp_created_at_modal = document.getElementById("emp_created_at_modal");
+    const emp_sss_modal = document.getElementById("emp_sss_modal");
+    const emp_philhealth_modal = document.getElementById("emp_philhealth_modal");
+    const emp_pagibig_modal = document.getElementById("emp_pagibig_modal");
+
+    async function loadEmployees() {
+      loaderTxt.textContent = "Loading employees...";
+      loader.classList.add("active");
+      try {
+        const { data, error } = await supabaseClient
+          .from("employees")
+          .select("*")
+          .order("id", { ascending: false });
+        console.log("Employees fetched:", data);
+        loader.classList.remove("active");
+
+        if (error) {
+          console.error("Error loading employees:", error);
+          dbTbody.innerHTML = `<tr><td colspan="5">Error loading data.</td></tr>`;
+          return;
+        }
+
+        if (!data || data.length === 0) {
+          dbTbody.innerHTML = `<tr><td colspan="5">No employees found.</td></tr>`;
+          employeesCache = [];
+          empCount.textContent = "0 records";
+          return;
+        }
+
+        employeesCache = data;
+        renderEmployeeRows(data);
+        empCount.textContent = `${data.length} records loaded.`;
+      } catch (err) {
+        loader.classList.remove("active");
+        console.error(err);
+        dbTbody.innerHTML = `<tr><td colspan="5">Error loading data.</td></tr>`;
+      }
+    }
+
+    function renderEmployeeRows(list) {
+      dbTbody.innerHTML = "";
+      list.forEach(row => {
+        const name = row.name_english ?? "";
+        const position = row.position ?? "";
+        const email = row.email ?? "";
+        const mobile = row.mobile ?? "";
+        const fileUrl = row.file_201_url ?? "";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+      <td>${escapeHtml(name)}</td>
+      <td>${escapeHtml(position)}</td>
+      <td>${escapeHtml(email)}</td>
+      <td>${escapeHtml(mobile)}</td>
+      <td>
+        <button class="btn viewBtn" data-id="${row.id}" style="background:#0a84ff;color:#fff;margin-right:6px;">View</button>
+        <button class="btn delBtn" data-id="${row.id}" style="background:#ff3b30;color:#fff;margin-right:6px;">Delete</button>
+        ${fileUrl ? `<a href="${fileUrl}" target="_blank" style="color:#007aff;text-decoration:none;">Download 201</a>` : ''}
+      </td>
+    `;
+
+        tr.querySelector(".viewBtn").onclick = (e) => {
+          e.stopPropagation();
+          openEmpModal(row);
+        };
+
+        tr.querySelector(".delBtn").onclick = async (e) => {
+          e.stopPropagation();
+          const confirmDel = confirm(`Are you sure you want to delete "${name}"?`);
+          if (!confirmDel) return;
+          await deleteEmployee(row.id);
+        };
+
+        dbTbody.appendChild(tr);
+      });
+    }
+
+
+    async function deleteEmployee(id) {
+      loaderTxt.textContent = "Deleting employee...";
+      loader.classList.add("active");
+      try {
+        const { error } = await supabaseClient.from("employees").delete().eq("id", id);
+        loader.classList.remove("active");
+        if (error) {
+          console.error("Delete error:", error);
+          alert("Error deleting employee: " + error.message);
+          return;
+        }
+
+        await loadEmployees();
+      } catch (err) {
+        loader.classList.remove("active");
+        console.error(err);
+        alert("Error deleting employee. Check console.");
+      }
+    }
+
+
+    empSearch.addEventListener("input", (e) => {
+      const q = (e.target.value || "").trim().toLowerCase();
+      if (!q) {
+        renderEmployeeRows(employeesCache);
+        return;
+      }
+      const filtered = employeesCache.filter(r => {
+
+        return (String(r.emp_name_english || "") + " " + String(r.emp_position || "") + " " + String(r.emp_email || "") + " " + String(r.emp_mobile || "")).toLowerCase().includes(q);
+      });
+      renderEmployeeRows(filtered);
+    });
+
+    function openEmpModal(row) {
+      // photo
+      const photo = row.photo_url;
+      empPhoto.src = photo && photo.length > 0
+        ? photo
+        : "https://via.placeholder.com/300x300?text=No+Photo";
+
+      console.log("Photo URL:", row.emp_photo_url);
+      empPhoto.src = photo || "https://via.placeholder.com/300x300?text=No+Photo";
+      empPhoto.alt = (row.name_english || "Employee");
+
+
+      emp_name_english_modal.textContent = row.name_english ?? "";
+      emp_position_modal.textContent = row.position ?? "";
+      emp_sex_modal.textContent = row.sex ?? "";
+      emp_blood_type_modal.textContent = row.blood_type ?? "";
+      emp_dob_modal.textContent = row.dob ? new Date(row.emp_dob).toLocaleDateString() : "";
+      emp_height_modal.textContent = row.height ?? "";
+      emp_weight_modal.textContent = row.weight ?? "";
+      emp_id_card_modal.textContent = row.id_card ?? "";
+      emp_email_modal.textContent = row.email ?? "";
+      emp_mobile_modal.textContent = row.mobile ?? "";
+      emp_created_at_modal.textContent = row.created_at ? new Date(row.created_at).toLocaleString() : "";
+      emp_sss_modal.textContent = row.sss ?? "";
+      emp_philhealth_modal.textContent = row.philhealth ?? "";
+      emp_pagibig_modal.textContent = row.pagibig ?? "";
+
+
+
+      const existingLink = document.getElementById("emp201Link");
+      if (existingLink) existingLink.remove(); // remove old link
+
+      if (row.file_201_url) {
+        const a = document.createElement("a");
+        a.id = "emp201Link";
+        a.href = row.file_201_url;
+        a.target = "_blank";
+        a.textContent = "Download 201 File";
+        a.style.display = "block";
+        a.style.marginTop = "10px";
+        empPhoto.parentElement.appendChild(a);
+      }
+
+      empModal.style.display = "flex";
+      empModal.setAttribute("aria-hidden", "false");
+    }
+
+
+
+    closeEmpModal.onclick = closeEmp;
+    function closeEmp() {
+      empModal.style.display = "none";
+      empModal.setAttribute("aria-hidden", "true");
+    }
+
+    const addEmpForm = document.getElementById("addEmpForm");
+    const addEmpLoader = document.getElementById("addEmpLoader");
+    const addEmpLoaderTxt = document.getElementById("addEmpLoaderTxt");
+    const photoInput = document.getElementById("emp_photo");
+    const photoPreview = document.getElementById("photoPreview");
+
+    photoInput.onchange = () => {
+      const file = photoInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          photoPreview.src = e.target.result;
+          photoPreview.classList.add("active");
+        };
+        reader.readAsDataURL(file);
+      } else {
+        photoPreview.src = "";
+        photoPreview.classList.remove("active");
+      }
+    };
+
+    addEmpForm.onsubmit = async (e) => {
+      e.preventDefault();
+      addEmpLoader.classList.add("active");
+      addEmpLoaderTxt.textContent = "Processing...";
+
+      try {
+
+        const name_english = document.getElementById("emp_name_english").value.trim();
+        const sex = document.getElementById("emp_sex").value;
+        const blood_type = document.getElementById("emp_blood_type").value.trim();
+        const dob = document.getElementById("emp_dob").value;
+        const height = document.getElementById("emp_height").value;
+        const weight = document.getElementById("emp_weight").value;
+        const position = document.getElementById("emp_position").value.trim();
+        const designation = document.getElementById("emp_designation").value;
+        const sss = document.getElementById("emp_sss").value.trim();
+        const philhealth = document.getElementById("emp_philhealth").value.trim();
+        const pagibig = document.getElementById("emp_pagibig").value.trim();
+        const id_card = document.getElementById("emp_id_card").value.trim();
+        const email = document.getElementById("emp_email").value.trim();
+        const mobile = document.getElementById("emp_mobile").value.trim();
+        const residence_address = document.getElementById("emp_residence_address").value.trim();
+        const residence_postal = document.getElementById("emp_residence_postal").value.trim();
+        const present_address = document.getElementById("emp_present_address").value.trim();
+        const present_postal = document.getElementById("emp_present_postal").value.trim();
+
+        const photoFile = document.getElementById("emp_photo").files[0];
+        const file201 = document.getElementById("emp_201file").files[0];
+
+        if (!photoFile || !file201) throw new Error("Photo and 201 file are required.");
+
+
+        addEmpLoaderTxt.textContent = "Uploading photo...";
+        const photoName = `employee_photos/${Date.now()}_${name_english.replace(/\s+/g, '_')}.${photoFile.name.split('.').pop()}`;
+        let { error: photoError } = await supabaseClient.storage.from("employee_photos").upload(photoName, photoFile);
+        if (photoError) throw photoError;
+        const { data: photoUrlData } = supabaseClient.storage.from("employee_photos").getPublicUrl(photoName);
+        const photo_url = photoUrlData.publicUrl;
+
+
+        addEmpLoaderTxt.textContent = "Uploading 201 file...";
+        const file201Name = `employee_201files/${Date.now()}_${name_english.replace(/\s+/g, '_')}_201.${file201.name.split('.').pop()}`;
+        let { error: fileError } = await supabaseClient.storage.from("employee_201files").upload(file201Name, file201);
+        if (fileError) throw fileError;
+        const { data: file201UrlData } = supabaseClient.storage.from("employee_201files").getPublicUrl(file201Name);
+        const file_201_url = file201UrlData.publicUrl;
+
+        // Insert employee record
+        addEmpLoaderTxt.textContent = "Saving employee data...";
+        const { error: insertError } = await supabaseClient.from("employees").insert([{
+          name_english, sex, blood_type, dob, height, weight, position, designation,
+          sss, philhealth, pagibig, id_card, email, mobile,
+          residence_address, residence_postal, present_address, present_postal,
+          photo_url, file_201_url
+        }]);
+        if (insertError) throw insertError;
+
+        addEmpLoaderTxt.textContent = "Success!";
+        alert("✅ Employee added successfully!");
+        addEmpForm.reset();
+        photoPreview.classList.remove("active");
+
+        await loadEmployees(); // Refresh table
+
+      } catch (err) {
+        console.error("Error adding employee:", err);
+        alert("❌ Error: " + err.message);
+      } finally {
+        setTimeout(() => addEmpLoader.classList.remove("active"), 500);
+        addEmpLoaderTxt.textContent = "Processing...";
+      }
+    };
+
+
+    // === Initial Render ===
+    loadEmployees();
+  </script>
+</body>
+
+</html>

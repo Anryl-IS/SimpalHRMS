@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Dashboard — Simpal HRMS</title>
+  <link rel="icon" type="image/png" href="https://i.imgur.com/6SF5KQG.png">
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <style>
+
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo-circle"><img src="https://i.imgur.com/6SF5KQG.png" alt="logo"></div>
+    <h2>Administrator</h2>
+    <nav class="nav">
+      <button class="tab-btn active" data-tab="irTab">Incident Reports</button>
+      <button class="tab-btn" data-tab="caseTab">Case Management</button>
+      <button class="tab-btn" data-tab="reportTrackerTab">Report Tracker</button>
+      <button class="tab-btn" data-tab="dbTab">Employee Database</button>
+    </nav>
+    <button id="logoutBtn">Logout</button>
+  </aside>
+
+  <!-- LOADER -->
+  <div class="loader-overlay" id="loader" aria-hidden="true">
+    <div class="spinner" role="status" aria-hidden="true"></div>
+    <p id="loaderTxt">Loading...</p>
+  </div>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="topbar">
+      <h1>HRMD — Admin Dashboard</h1>
+      <div class="topbar-actions">
+        <input id="globalSearch" class="search-input" placeholder="Search everything...">
+        <button class="action-btn" id="themeToggle">Theme</button>
+      </div>
+    </header>
+
+    <!-- INCIDENT REPORTS TAB -->
+    <div id="irTab" class="tab-content active">
+      <h2 class="section-title">Incident Reports</h2>
+
+      <div class="toolbar" style="margin-bottom:15px;">
+        <select id="areaFilter"
+          style="padding:10px;border-radius:8px;background:#161616;border:1px solid #2d2d2f;color:#fff;">
+          <option value="all">All Areas</option>
+          <option value="ir_mag_norte">Mag Norte</option>
+          <option value="ir_mag_sur">Mag Sur</option>
+          <option value="ir_ldn">Lanao Del Norte</option>
+          <option value="ir_lds">Lanao Del Sur</option>
+          <option value="ir_cot">Cotabato</option>
+        </select>
+        <button id="filterBtn"
+          style="background:#0a84ff;padding:10px 16px;border:none;border-radius:8px;color:#fff;font-weight:600;cursor:pointer;">Filter</button>
+        <button id="addIRBtn">+ Add Incident Report</button>
+      </div>
+
+      <div class="table-wrap card">
+        <table>
+          <thead>
+            <tr>
+              <th>Transaction Code</th>
+              <th>Agent Name</th>
+              <th>File</th>
+              <th>Date Posted</th>
+              <th>Area</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="reportsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <!-- CASE MANAGEMENT TAB -->
+    <div id="caseTab" class="tab-content">
+      <h2 class="section-title">Case Management</h2>
+
+      <div class="table-wrap card">
+        <table>
+          <thead>
+            <tr>
+              <th>Transcode</th>
+              <th>Case</th>
+              <th>Area</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="caseTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- REPORT TRACKER TAB -->
+    <div id="reportTrackerTab" class="tab-content">
+      <h2 class="section-title">Report Status Tracker</h2>
+
+      <div class="kpi-row"
+        style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
+        <div class="card" style="padding: 15px; text-align: center;">
+          <div class="small-muted">Total Assigned</div>
+          <div id="adminStatsTotal" style="font-size: 24px; font-weight: 700; color: #fff;">0</div>
+        </div>
+        <div class="card" style="padding: 15px; text-align: center;">
+          <div class="small-muted">Submitted</div>
+          <div id="adminStatsSubmitted" style="font-size: 24px; font-weight: 700; color: #10b981;">0</div>
+        </div>
+        <div class="card" style="padding: 15px; text-align: center;">
+          <div class="small-muted">Pending</div>
+          <div id="adminStatsPending" style="font-size: 24px; font-weight: 700; color: #f59e0b;">0</div>
+        </div>
+        <div class="card" style="padding: 15px; text-align: center;">
+          <div class="small-muted">Overdue</div>
+          <div id="adminStatsOverdue" style="font-size: 24px; font-weight: 700; color: #ef4444;">0</div>
+        </div>
+      </div>
+
+      <div class="table-wrap card">
+        <table>
+          <thead>
+            <tr>
+              <th>Employee Name</th>
+              <th>Assigned Report</th>
+              <th>Due Date</th>
+              <th>Submission Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminTrackerTbody">
+            <!-- JS populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <div id="dbTab" class="tab-content">
+      <h2 class="section-title">Employee Database</h2>
+      <div class="toolbar" style="margin-bottom:8px;">
+        <input id="empSearch" class="search-input" placeholder="Search name, position, email or mobile...">
+        <div class="small-muted">Records Loaded.</div>
+      </div>
+
+      <div class="table-wrap card">
+        <table>
+          <thead>
+            <tr>
+              <th>Name (English)</th>
+              <th>Position</th>
+              <th>Email</th>
+              <th>Mobile</th>
+            </tr>
+          </thead>
+          <tbody id="dbTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="watermark">Designed & Developed by: <strong>Edwin Angelo Catequista</strong></div>
+  </main>
+
+  <div class="modal" id="irModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add Incident Report</h3>
+        <button type="button" class="modal-close" aria-label="Close" id="closeModalBtn">✕</button>
+      </div>
+      <form id="irForm">
+        <input type="hidden" id="irId">
+        <input id="agent_name" type="text" placeholder="Agent name" required>
+        <input id="area" type="text" placeholder="Area" required>
+        <input id="date_posted" type="date" required>
+        <select id="status" required>
+          <option value="">Select Status</option>
+          <option value="Open">Open</option>
+          <option value="Closed">Closed</option>
+          <option value="Pending">Pending</option>
+        </select>
+        <input id="file" type="file" accept=".pdf,.doc,.docx,.jpg,.png">
+        <div id="filePreview" style="margin-bottom:10px;"></div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button type="button" id="closeModalBtn" class="action-btn"
+            style="background:#444;color:#fff;">Cancel</button>
+          <button type="submit" id="saveBtn" class="action-btn" style="background:#0a84ff;color:#fff;">Save</button>
+        </div>
+        <div id="formMsg" style="margin-top:8px;color:#ffcc00;display:none;"></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="caseModal" class="modal" aria-hidden="true">
+    <div class="modal-card" style="width:820px; max-width:95%;">
+      <div class="modal-header">
+        <h3 id="caseModalTitle">Case Details</h3>
+        <button class="modal-close" id="closeCaseModal" aria-label="Close">✕</button>
+      </div>
+
+      <div id="caseDetailsContainer" class="case-details" style="margin-top:8px;">
+        <div class="case-grid">
+          <div class="case-col">
+            <div class="field">
+              <div class="label small-muted">Case</div>
+              <div class="value" id="detail_case_name"></div>
+            </div>
+
+            <div class="field">
+              <div class="label small-muted">Area</div>
+              <div class="value" id="detail_area"></div>
+            </div>
+
+            <div class="field">
+              <div class="label small-muted">Employees</div>
+              <div class="value" id="detail_employees"></div>
+            </div>
+
+            <div class="field">
+              <div class="label small-muted">Officer</div>
+              <div class="value" id="detail_officer"></div>
+            </div>
+
+            <div class="field">
+              <div class="label small-muted">File</div>
+              <div class="value" id="detail_file_link"></div>
+            </div>
+          </div>
+
+          <div class="case-col">
+            <div class="field">
+              <div class="label small-muted">Status</div>
+              <div class="value">
+                <select id="detail_STATUS" class="status-select">
+                  <option value="OPEN">OPEN</option>
+                  <option value="NTE">IR</option>
+                  <option value="NTE">NTE</option>
+                  <option value="AH">AH</option>
+                  <option value="NTW">NTW</option>
+                  <option value="NTD">NTD</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer case-footer" style="margin-top:18px;">
+          <div id="savedMsg" class="small-muted saved-msg">Status updated!</div>
+          <button class="btn btn-secondary" id="cancelCaseBtn">Close</button>
+          <button class="btn btn-primary" id="saveCaseBtn" style="display:none;margin-left:8px;">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="empModal" class="modal" aria-hidden="true">
+    <div class="modal-card" style="width:820px; max-width:95%;">
+      <div class="modal-header">
+        <h3 id="empModalTitle">Employee Profile</h3>
+        <button class="modal-close" id="closeEmpModal" aria-label="Close">✕</button>
+      </div>
+
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;">
+        <div style="min-width:140px; text-align:center;">
+          <img id="empPhoto" src="https://i.imgur.com/6SF5KQG.png" alt="Employee photo"
+            style="width:120px;height:120px;border-radius:8px;object-fit:cover;border:3px solid #1e1e1f;">
+        </div>
+        <div style="flex:1;min-width:280px;">
+          <div class="small-muted">Name (English)</div>
+          <div id="emp_name_english">-</div>
+
+          <div class="small-muted">201 File</div>
+          <div id="emp_201_file_link">No 201 file.</div>
+
+          <div class="small-muted">Position</div>
+          <div id="emp_position">-</div>
+          <div class="small-muted">Sex</div>
+          <div id="emp_sex">-</div>
+          <div class="small-muted">Blood Type</div>
+          <div id="emp_blood_type">-</div>
+        </div>
+        <div style="flex:1;min-width:220px;">
+          <div class="small-muted">Email</div>
+          <div id="emp_email">-</div>
+          <div class="small-muted">Mobile</div>
+          <div id="emp_mobile">-</div>
+          <div class="small-muted">ID Card</div>
+          <div id="emp_id_card">-</div>
+          <div class="small-muted">DOB</div>
+          <div id="emp_dob">-</div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+        <button class="action-btn" id="closeEmpBtn" style="background:#444;color:#fff;">Close</button>
+      </div>
+    </div>
+  </div>
+  <script src="../js/admin.js"></script>
+  <!-- Employee 201 file preview modal (only used for 201 files) -->
+  <div id="empFileModal" class="modal" aria-hidden="true">
+    <div class="modal-card" style="max-width:900px; width:95%;">
+      <div class="modal-header">
+        <h3>201 File Preview</h3>
+        <button class="modal-close" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="empFileContainer" style="min-height:280px;">
+          <iframe id="empFileIframe" src=""
+            style="width:100%;height:420px;border:none;border-radius:8px;background:#fff"></iframe>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a id="empFileDownload" class="btn btn-primary" href="#" download>Download</a>
+        <button class="btn btn-secondary modal-close">Close</button>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

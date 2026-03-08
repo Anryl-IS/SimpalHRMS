@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Simpal HRMS</title>
+  <link rel="icon" type="image/png" href="https://i.imgur.com/6SF5KQG.png">
+  <link rel="stylesheet" href="css/login.css">
+  <link rel="stylesheet" href="css/modal.css">
+</head>
+</head>
+
+<body>
+  <div class="login-wrapper">
+    <div class="hero-panel">
+      <!-- Reimagined Background Image -->
+      <img src="login_hero_abstract.png" class="hero-image" alt="Data Network Hero">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-logo">
+          <img src="https://i.imgur.com/6SF5KQG.png" alt="Simpal Group Logo">
+        </div>
+        <h1>Portal Experience</h1>
+        <p>Simpal Group — Strategic HR Ecosystem</p>
+      </div>
+    </div>
+
+    <div class="form-panel">
+      <div class="login-card">
+        <!-- Logo appears on top in mobile view -->
+        <div class="hero-logo hero-logo-mobile">
+          <img src="https://i.imgur.com/6SF5KQG.png" alt="Company Logo">
+        </div>
+
+        <h2>Authentication</h2>
+        <p>Access the HRMD Centralized Management System.</p>
+
+        <div class="error-msg" id="errorMsg">The credentials provided are incorrect.</div>
+
+        <form id="loginForm">
+          <div class="input-container">
+            <label for="username">AGENT USERNAME</label>
+            <input type="text" id="username" placeholder="Enter your ID or username..." required>
+          </div>
+          <div class="input-container">
+            <label for="password">SECURE PASSWORD</label>
+            <input type="password" id="password" placeholder="••••••••" required>
+          </div>
+          <button type="submit">Authenticate User</button>
+        </form>
+
+        <div class="watermark">Precision Development: <strong>Edwin Angelo Catequista</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="loadingOverlay">
+    <div class="spinner"></div>
+
+    <div class="loading-text">Logging In, Please Wait...</div>
+  </div>
+
+  <button class="dev-link-btn" id="openDevelopersModal">Developers</button>
+
+  <div id="developersModal" class="developer-modal">
+    <div class="developer-modal-content">
+      <span class="modal-close-btn">&times;</span>
+      <h1>ERK Software Developement Ltd.</h1>
+
+      <div class="developer-grid">
+        <div class="developer-card">
+          <div class="developer-content">
+            <div class="developer-photo">EA</div>
+            <div class="developer-name">Angelo Catequista</div>
+            <div class="developer-role">Full Stack Developer</div>
+            <div class="developer-bio">Enjoys building complete applications from frontend to backend. Focused on
+              performance and scalability.</div>
+            <div class="social-links">
+
+            </div>
+          </div>
+        </div>
+
+        <div class="developer-card">
+          <div class="developer-content">
+            <div class="developer-photo">JR</div>
+            <div class="developer-name">Jay Ryan Lim</div>
+            <div class="developer-role">Full Stack Developer</div>
+            <div class="developer-bio">Specializes in server-side logic, database management, and APIs. Loves solving
+              complex problems.</div>
+            <div class="social-links">
+
+            </div>
+          </div>
+        </div>
+
+        <div class="developer-card">
+          <div class="developer-content">
+            <div class="developer-photo">KL</div>
+            <div class="developer-name">Kevin Levbrillo</div>
+            <div class="developer-role">Frontend Developer</div>
+            <div class="developer-bio">Passionate about clean UI/UX and modern web designs. Loves coding interactive
+              interfaces.</div>
+            <div class="social-links">
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/index.js"></script>
+  <script>
+    const modal = document.getElementById("developersModal");
+    const btn = document.getElementById("openDevelopersModal");
+    const span = document.getElementsByClassName("modal-close-btn")[0];
+
+
+    btn.onclick = function () {
+      modal.classList.add('show');
+    }
+
+    span.onclick = function () {
+      modal.classList.remove('show');
+    }
+
+
+    window.onclick = function (event) {
+      if (event.target == modal) {
+        modal.classList.remove('show');
+      }
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,10 @@
+<script src="https://unpkg.com/@supabase/supabase-js"></script>
+<script>
+  const { createClient } = supabase;
+  const supabaseClient = createClient(
+    "https://hzafznqoyinfjbqrrerp.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6YWZ6bnFveWluZmpicXJyZXJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MDYzMzcsImV4cCI6MjA3NjA4MjMzN30.qQFFQ6fzqBXxl63JG4JWNZ0JR0ZVnoyiU65J4VlDNG8"
+  );
+
+  supabaseClient.from('test').select('*').then(console.log);
+</script>

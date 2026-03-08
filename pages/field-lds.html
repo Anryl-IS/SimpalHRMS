@@ -1,0 +1,1157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Customer Sales Representative</title>
+  <link rel="icon" href="https://i.imgur.com/6SF5KQG.png">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link rel="stylesheet" href="csr-styles.css">
+
+  <style>
+    /* Enhanced Modern UI Styles */
+    body {
+      background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 50%, #16213e 100%);
+      backdrop-filter: blur(10px);
+    }
+
+    .layout {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 24px;
+      grid-template-columns: 260px 1fr;
+      gap: 24px;
+    }
+
+    /* Enhanced Sidebar */
+    .sidebar {
+      background: linear-gradient(180deg, rgba(22, 27, 34, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 24px 20px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      height: fit-content;
+      position: sticky;
+      top: 24px;
+    }
+
+    .sidebar img {
+      width: 72px;
+      height: 72px;
+      border: 3px solid rgb(255, 255, 255);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      background: linear-gradient(135deg, rgb(255, 255, 255) 0%, rgb(255, 255, 255) 100%);
+      border-radius: 16px;
+      padding: 8px;
+      object-fit: contain;
+    }
+
+    .sidebar h3 {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      margin: 16px 0 20px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .sidebar button {
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+
+    .sidebar button.active {
+      background: linear-gradient(135deg, #0a84ff 0%, #0066cc 100%);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(10, 132, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.1);
+      transform: translateX(4px);
+    }
+
+    .sidebar button:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.1);
+      transform: translateX(2px);
+    }
+
+    #logoutBtn {
+      margin-top: 24px;
+      background: rgba(255, 77, 79, 0.1);
+      border: 1px solid rgba(255, 77, 79, 0.2);
+      color: #ff4d4f;
+    }
+
+    #logoutBtn:hover {
+      background: rgba(255, 77, 79, 0.2);
+      transform: translateX(0);
+    }
+
+    /* Enhanced Main Content */
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Enhanced Topbar */
+    .topbar {
+      background: linear-gradient(135deg, rgba(22, 27, 34, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 24px 28px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .topbar h1 {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0 0 8px;
+    }
+
+    .topbar > div:first-child > div {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 500;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .controls select,
+    .controls input {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 12px 16px;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      min-width: 150px;
+    }
+
+    .controls select:focus,
+    .controls input:focus {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: #0a84ff;
+      box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+      outline: none;
+    }
+
+    .controls select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 40px;
+      cursor: pointer;
+    }
+
+    .controls select option {
+      background: #1a1f2e;
+      color: #fff;
+      padding: 10px;
+    }
+
+    #searchInput {
+      min-width: 250px;
+      flex: 1;
+    }
+
+    #searchInput::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Enhanced Buttons */
+    .primary {
+      background: linear-gradient(135deg, #0a84ff 0%, #0066cc 100%);
+      box-shadow: 0 4px 16px rgba(10, 132, 255, 0.3);
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(10, 132, 255, 0.4);
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 12px 20px;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Enhanced KPI Cards */
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .kpi {
+      background: linear-gradient(135deg, rgba(22, 27, 34, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #0a84ff, #0066cc);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .kpi:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .kpi:hover::before {
+      opacity: 1;
+    }
+
+    .kpi .val {
+      font-size: 32px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .kpi .muted {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Enhanced Table Card */
+    .card {
+      background: linear-gradient(135deg, rgba(22, 27, 34, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 28px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      margin: 0 0 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Enhanced Table */
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    thead th {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 16px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    thead th:first-child {
+      border-top-left-radius: 12px;
+    }
+
+    thead th:last-child {
+      border-top-right-radius: 12px;
+    }
+
+    tbody tr {
+      transition: all 0.2s ease;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.05);
+      transform: scale(1.01);
+    }
+
+    tbody td {
+      padding: 16px;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+    }
+
+    .status-badge {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 12px;
+      display: inline-block;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .status-badge.status-open {
+      background: rgba(40, 167, 69, 0.2);
+      color: #28a745;
+      border-color: rgba(40, 167, 69, 0.3);
+    }
+
+    .status-badge.status-pending {
+      background: rgba(255, 193, 7, 0.2);
+      color: #ffc107;
+      border-color: rgba(255, 193, 7, 0.3);
+    }
+
+    .status-badge.status-closed {
+      background: rgba(108, 117, 125, 0.2);
+      color: #6c757d;
+      border-color: rgba(108, 117, 125, 0.3);
+    }
+
+    .status-badge.status-nte {
+      background: rgba(0, 123, 255, 0.2);
+      color: #007bff;
+      border-color: rgba(0, 123, 255, 0.3);
+    }
+
+    .status-badge.status-ntw {
+      background: rgba(138, 43, 226, 0.2);
+      color: #8a2be2;
+      border-color: rgba(138, 43, 226, 0.3);
+    }
+
+    .status-badge.status-ntd {
+      background: rgba(139, 69, 19, 0.2);
+      color: #8b4513;
+      border-color: rgba(139, 69, 19, 0.3);
+    }
+
+    .status-badge.status-ah {
+      background: rgba(220, 53, 69, 0.2);
+      color: #dc3545;
+      border-color: rgba(220, 53, 69, 0.3);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .actions button {
+      padding: 8px 16px;
+      font-size: 13px;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+
+    /* Enhanced Modal */
+    .modal {
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-card {
+      background: linear-gradient(135deg, rgba(22, 27, 34, 0.98) 0%, rgba(15, 23, 42, 0.98) 100%);
+      backdrop-filter: blur(30px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      max-width: 800px;
+      width: 90%;
+    }
+
+    .modal-card h3 {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 0 28px;
+      color: #fff;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-row label {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .modal-row input,
+    .modal-row select {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 12px 16px;
+      border-radius: 12px;
+      color: #fff;
+      width: 100%;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .modal-row input:focus,
+    .modal-row select:focus {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: #0a84ff;
+      box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+      outline: none;
+    }
+
+    .modal-footer {
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Watermark */
+    .watermark {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.3);
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      text-align: center;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: relative;
+        top: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+    
+  <div class="layout">
+    <aside class="sidebar">
+      <div style="text-align:center;margin-bottom:20px">
+        <img src="https://i.imgur.com/6SF5KQG.png" alt="logo">
+      </div>
+      <h3>Customer Sales Representative</h3>
+      <button class="active">Dashboard</button>
+      <button id="logoutBtn">Logout</button>
+      <div style="margin-top:auto" class="watermark">Designed & Developed by <strong>Edwin Angelo</strong></div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div>
+          <h1>Dashboard</h1>
+          <div>Incident Reports Management</div>
+        </div>
+
+        <div class="controls">
+          <select id="areaFilter">
+            <option value="all">All Areas</option>
+            <option value="ir_mag_norte">📍 Mag Norte</option>
+            <option value="ir_mag_sur">📍 Mag Sur</option>
+            <option value="ir_ldn">📍 Lanao Del Norte</option>
+            <option value="ir_lds">📍 Lanao Del Sur</option>
+            <option value="ir_cot">📍 Cotabato</option>
+          </select>
+
+          <select id="statusFilter">
+            <option value="all">All Statuses</option>
+            <option value="Open">Open</option>
+            <option value="Pending">Pending</option>
+            <option value="Closed">Closed</option>
+            <option value="NTE">NTE</option>
+            <option value="NTW">NTW</option>
+            <option value="NTD">NTD</option>
+            <option value="AH">AH</option>
+          </select>
+
+          <input id="searchInput" placeholder="Search reports..." />
+
+          <button id="addIrBtn" class="primary">Add Incident Report</button>
+          <button id="refreshBtn" class="btn-ghost">Refresh</button>
+        </div>
+      </div>
+
+      <div class="kpis" id="kpiContainer">
+        <div class="kpi card"><div class="val" id="kpiTotal">0</div><div class="muted">Total Reports</div></div>
+        <div class="kpi card"><div class="val" id="kpiOpen">0</div><div class="muted">Open</div></div>
+        <div class="kpi card"><div class="val" id="kpiPending">0</div><div class="muted">Pending</div></div>
+        <div class="kpi card"><div class="val" id="kpiClosed">0</div><div class="muted">Closed</div></div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 8px">Incident Reports</h3>
+        <table id="irTable" aria-live="polite">
+          <thead>
+            <tr><th>Transaction Code</th><th>Agent</th><th>File</th><th>Date</th><th>Area</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="irTbody"></tbody>
+        </table>
+      </div>
+
+     
+
+  <!-- INCIDENT MODAL -->
+  <div class="modal" id="irModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="irModalTitle">
+      <h3 id="irModalTitle">Add Incident Report</h3>
+      <form id="irForm">
+        <input type="hidden" id="ir_record_id" />
+        <div class="modal-grid">
+          <div>
+            <div class="modal-row">
+              <label for="ir_agent">Agent name</label>
+              <input id="ir_agent" required />
+            </div>
+            <div class="modal-row">
+              <label for="ir_area">Area (select)</label>
+              <select id="ir_area" required>
+                <option value="ir_mag_norte">Mag Norte</option>
+                <option value="ir_mag_sur">Mag Sur</option>
+                <option value="ir_ldn">Lanao Del Norte</option>
+                <option value="ir_lds">Lanao Del Sur</option>
+                <option value="ir_cot">Cotabato</option>
+              </select>
+            </div>
+            <div class="modal-row">
+              <label for="ir_date">Date Posted</label>
+              <input id="ir_date" type="date" required />
+            </div>
+          </div>
+          <div>
+            <div class="modal-row">
+              <label for="ir_status">Status</label>
+              <select id="ir_status" required>
+                <option value="">Select status</option>
+                <option>Open</option>
+                <option>Pending</option>
+                <option>Closed</option>
+                <option>NTE</option>
+                <option>NTW</option>
+                <option>NTD</option>
+                <option>AH</option>
+              </select>
+            </div>
+
+            <div class="modal-row">
+              <label for="ir_file">Attach file</label>
+              <input id="ir_file" type="file" accept=".pdf,.doc,.docx,.jpg,.png" />
+            </div>
+
+            <div class="modal-row">
+              <label>File preview</label>
+              <div id="ir_file_preview" style="color:var(--muted);font-size:13px">No file selected</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-ghost" id="irCancelBtn">Cancel</button>
+          <button type="submit" class="primary" id="irSaveBtn">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CASE MODAL (DETAIL + status change) -->
+  <div class="modal" id="caseModal" aria-hidden="true">
+    <div class="modal-card">
+      <h3 id="caseModalTitle">Case Details</h3>
+      <div id="caseDetails">
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div style="flex:1">
+            <div style="color:var(--muted);font-size:12px">Case</div>
+            <div id="detail_case_name" style="margin-bottom:8px"></div>
+
+            <div style="color:var(--muted);font-size:12px">Area</div>
+            <div id="detail_case_area" style="margin-bottom:8px"></div>
+
+            <div style="color:var(--muted);font-size:12px">Employees</div>
+            <div id="detail_case_employees" style="margin-bottom:8px"></div>
+          </div>
+
+          <div style="flex:1;min-width:200px">
+            <div style="color:var(--muted);font-size:12px">Officer</div>
+            <div id="detail_case_officer" style="margin-bottom:8px"></div>
+
+            <div style="color:var(--muted);font-size:12px">Status</div>
+            <select id="detail_case_status" style="width:100%;padding:10px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:#fff">
+              <option>OPEN</option>
+              <option>NTE</option>
+              <option>AH</option>
+              <option>NTW</option>
+              <option>NTD</option>
+              <option>CLOSED</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+          <div id="caseSavedMsg" style="color:var(--success);font-weight:700;align-self:center;opacity:0;transition:opacity .2s">Status updated!</div>
+          <button class="btn-ghost" id="caseCloseBtn">Close</button>
+          <button class="primary" id="caseSaveBtn" style="display:none">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loader" id="loader">Loading...</div>
+
+<script>
+/* =================== CONFIG (update if rotated) =================== */
+const SUPABASE_URL = 'https://hzafznqoyinfjbqrrerp.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6YWZ6bnFveWluZmpicXJyZXJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MDYzMzcsImV4cCI6MjA3NjA4MjMzN30.qQFFQ6fzqBXxl63JG4JWNZ0JR0ZVnoyiU65J4VlDNG8';
+
+var supabaseClient;
+function initSupabase() {
+  try {
+    if (!window.supabase || !window.supabase.createClient) {
+      console.error('Supabase library not loaded. Please check your internet connection.');
+      return false;
+    }
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    return true;
+  } catch (err) {
+    console.error('Supabase initialization error:', err);
+    return false;
+  }
+}
+
+// Try to initialize immediately, or wait for script to load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!initSupabase()) {
+      // Try again after a short delay in case script is still loading
+      setTimeout(() => initSupabase(), 500);
+    }
+  });
+} else {
+  // DOM already loaded, try to initialize
+  if (!initSupabase()) {
+    setTimeout(() => initSupabase(), 500);
+  }
+}
+
+
+
+/* =================== ELEMENTS =================== */
+const loader = document.getElementById('loader');
+const areaFilter = document.getElementById('areaFilter');
+const statusFilter = document.getElementById('statusFilter');
+const searchInput = document.getElementById('searchInput');
+const addIrBtn = document.getElementById('addIrBtn');
+const refreshBtn = document.getElementById('refreshBtn');
+
+const irModal = document.getElementById('irModal');
+const irForm = document.getElementById('irForm');
+const ir_record_id = document.getElementById('ir_record_id');
+const ir_agent = document.getElementById('ir_agent');
+const ir_area = document.getElementById('ir_area');
+const ir_date = document.getElementById('ir_date');
+const ir_status = document.getElementById('ir_status');
+const ir_file = document.getElementById('ir_file');
+const ir_file_preview = document.getElementById('ir_file_preview');
+const irCancelBtn = document.getElementById('irCancelBtn');
+const irSaveBtn = document.getElementById('irSaveBtn');
+
+const irTbody = document.getElementById('irTbody');
+
+const kpiTotal = document.getElementById('kpiTotal');
+const kpiOpen = document.getElementById('kpiOpen');
+const kpiPending = document.getElementById('kpiPending');
+const kpiClosed = document.getElementById('kpiClosed');
+
+
+let currentCase = null;
+let originalCaseStatus = null;
+ 
+/* CASE modal elements (may be missing on some pages) */
+const caseTbody = document.getElementById('caseTbody');
+const caseModal = document.getElementById('caseModal');
+const detail_case_status = document.getElementById('detail_case_status');
+const caseSaveBtn = document.getElementById('caseSaveBtn');
+const caseCloseBtn = document.getElementById('caseCloseBtn');
+const caseSavedMsg = document.getElementById('caseSavedMsg');
+
+/* Area table mapping */
+const AREA_MAP = {
+  ir_mag_norte: 'Mag Norte',
+  ir_mag_sur: 'Mag Sur',
+  ir_ldn: 'Lanao Del Norte',
+  ir_lds: 'Lanao Del Sur',
+  ir_cot: 'Cotabato'
+};
+
+/* =================== UTIL =================== */
+function showLoader(txt='Loading...'){ loader.textContent = txt; loader.style.display = 'block'; }
+function hideLoader(){ loader.style.display = 'none'; }
+function escapeHtml(str){ if (!str && str !== 0) return ''; return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+function formatDate(d){ if(!d) return ''; const dt = new Date(d); if (isNaN(dt)) return d; return dt.toLocaleDateString(); }
+
+/* =================== INCIDENTS: multi-table fetch & CRUD =================== */
+
+/*
+  We'll fetch from the 5 area tables. If areaFilter === 'all', fetch all and combine.
+  Each row returned is normalized with { area_table, area_label } so UI knows the source.
+*/
+
+async function fetchIRs(area='all'){
+  if (!supabaseClient) {
+    hideLoader();
+    irTbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted)">Supabase not loaded. Please check your connection and refresh.</td></tr>`;
+    return;
+  }
+  
+  showLoader('Loading incident reports...');
+  irTbody.innerHTML = '';
+
+  try {
+    let query = supabaseClient.from('ir_cases').select('*');
+    
+    // Filter by area if not 'all'
+    if (area !== 'all') {
+      query = query.eq('area', area);
+    }
+    
+    const { data, error } = await query.order('date_posted', { ascending: false });
+    if (error) throw error;
+    
+    // Map area codes to labels for display
+    const results = (data || []).map(r => ({
+      ...r,
+      area_label: AREA_MAP[r.area] || r.area
+    }));
+
+    // apply client-side filters and search
+    const search = (searchInput.value||'').trim().toLowerCase();
+    const statusF = statusFilter.value;
+
+    let filtered = results.filter(r => {
+      // search across agent, file_name, date_posted
+      const hay = `${r.agent_name||''} ${r.file_name||''} ${r.date_posted||''}`.toLowerCase();
+      if (search && !hay.includes(search)) return false;
+      if (statusF !== 'all' && statusF) {
+        if ((r.status||'').toString().toLowerCase() !== statusF.toLowerCase()) return false;
+      }
+      return true;
+    });
+
+    // Sort newest-first by date_posted if available or created_at
+    filtered.sort((a,b) => new Date(b.date_posted || b.created_at || 0) - new Date(a.date_posted || a.created_at || 0));
+
+    // render rows
+    if (filtered.length === 0) {
+      irTbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted)">No incident reports</td></tr>`;
+    } else {
+      filtered.forEach(r => {
+        const tr = document.createElement('tr');
+        const fileCell = r.file_url ? `<a href="${escapeHtml(r.file_url)}" target="_blank">${escapeHtml(r.file_name||'file')}</a>` : '';
+        tr.innerHTML = `
+          <td>${escapeHtml(r.transcode||'')}</td>
+          <td>${escapeHtml(r.agent_name||'')}</td>
+          <td>${fileCell}</td>
+          <td>${formatDate(r.date_posted)}</td>
+          <td>${escapeHtml(r.area_label||r.area||'')}</td>
+          <td><span class="status-badge status-${String(r.status||'').toLowerCase().replace(/\s+/g, '-')}">${escapeHtml(r.status||'')}</span></td>
+          <td class="actions">
+             <button class="btn-ghost" data-action="edit" data-id="${escapeHtml(r.id)}">Edit</button>
+             <button class="btn-ghost" data-action="delete" data-id="${escapeHtml(r.id)}">Delete</button>
+             
+          </td>
+        `;
+        irTbody.appendChild(tr);
+      });
+    }
+
+    updateKPIs(results);
+    hideLoader();
+  } catch (err) {
+    console.error('fetchIRs', err);
+    hideLoader();
+    irTbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted)">Error loading data</td></tr>`;
+  }
+}
+
+function updateKPIs(allRows){
+  const total = allRows.length;
+  const open = allRows.filter(r => String(r.status||'').toLowerCase() === 'open').length;
+  const pending = allRows.filter(r => String(r.status||'').toLowerCase() === 'pending').length;
+  const closed = allRows.filter(r => String(r.status||'').toLowerCase() === 'closed').length;
+
+  kpiTotal.textContent = total;
+  kpiOpen.textContent = open;
+  kpiPending.textContent = pending;
+  kpiClosed.textContent = closed;
+}
+
+/* Open modal for creating or editing */
+function openIrModal({ record=null } = {}){
+  try {
+    if (!irModal) {
+      console.error('irModal element not found');
+      alert('Error: Modal element not found');
+      return;
+    }
+    ir_form_reset();
+    if (record) {
+      // populate fields for edit mode
+      ir_record_id.value = record.id;
+      ir_agent.value = record.agent_name || '';
+      ir_area.value = record.area || ''; // use area field from record
+      ir_date.value = record.date_posted ? new Date(record.date_posted).toISOString().split('T')[0] : '';
+      ir_status.value = record.status || '';
+      ir_file_preview.textContent = record.file_name ? `${record.file_name}` : 'No file attached';
+      irModal.classList.add('show');
+    } else {
+      // create mode: use current areaFilter if not 'all'
+      if (areaFilter && areaFilter.value !== 'all') ir_area.value = areaFilter.value;
+      irModal.classList.add('show');
+    }
+  } catch (err) {
+    console.error('Error opening IR modal:', err);
+    alert('Error opening modal. Check console for details.');
+  }
+}
+function closeIrModal(){ irModal.classList.remove('show'); ir_form_reset(); }
+
+function ir_form_reset(){
+  irForm.reset();
+  ir_record_id.value = '';
+  ir_file_preview.textContent = 'No file selected';
+}
+
+/* Save (create or update) - handles file upload */
+if (irForm) {
+  irForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  if (!supabaseClient) {
+    alert('Supabase is not loaded. Please check your internet connection and refresh the page.');
+    return;
+  }
+  
+  irSaveBtn.disabled = true; irSaveBtn.textContent = 'Saving...';
+  showLoader('Saving incident...');
+  try {
+    const recId = ir_record_id.value;
+    const payload = {
+      agent_name: ir_agent.value,
+      area: ir_area.value,
+      date_posted: ir_date.value,
+      status: ir_status.value,
+    };
+
+    // file upload if present
+    const file = ir_file.files[0];
+    let file_name = null, file_url = null;
+    if (file) {
+      // store under bucket 'incident_reports' path: <area>/<timestamp>-filename
+      const bucket = 'incident_reports_sales';
+      const path = `${payload.area}/${Date.now()}_${file.name}`;
+      const { error: uploadErr } = await supabaseClient.storage.from(bucket).upload(path, file);
+      if (uploadErr) throw uploadErr;
+      const { data: publicURL } = supabaseClient.storage.from(bucket).getPublicUrl(path);
+      file_name = file.name;
+      file_url = publicURL.publicUrl;
+      payload.file_name = file_name;
+      payload.file_url = file_url;
+    }
+
+    // Generate transaction code
+    let transcode;
+    if (!recId) {
+      // New record: generate new transcode
+      const { data: existing } = await supabaseClient
+        .from('ir_cases')
+        .select('id')
+        .eq('area', payload.area);
+      const nextNum = (existing?.length || 0) + 1;
+      transcode = `${payload.area}-IR-${String(nextNum).padStart(3, '0')}`;
+      payload.transcode = transcode;
+    } else {
+      // Update: keep existing transcode
+      const { data: existing } = await supabaseClient
+        .from('ir_cases')
+        .select('transcode')
+        .eq('id', recId)
+        .single();
+      if (existing) {
+        payload.transcode = existing.transcode;
+      }
+    }
+
+    // write to ir_cases table with area field
+    if (!payload.area) throw new Error('Area not selected');
+
+    if (recId) {
+      // update
+      const { error } = await supabaseClient.from('ir_cases').update(payload).eq('id', recId);
+      if (error) throw error;
+    } else {
+      // insert
+      const { error } = await supabaseClient.from('ir_cases').insert([payload]);
+      if (error) throw error;
+    }
+
+    await fetchIRs(areaFilter.value);
+    closeIrModal();
+  } catch (err) {
+    console.error('save IR', err);
+    alert('Error saving incident: ' + (err.message || 'Check console for details.'));
+  } finally {
+    hideLoader();
+    if (irSaveBtn) {
+      irSaveBtn.disabled = false; 
+      irSaveBtn.textContent = 'Save';
+    }
+  }
+  });
+}
+
+/* IR table actions (edit/delete/view) via event delegation */
+if (irTbody) {
+  irTbody.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    if (action === 'view') {
+      const url = btn.dataset.url;
+      if (url) window.open(url, '_blank');
+      return;
+    }
+
+    const id = btn.dataset.id;
+    if (!id) return;
+
+    if (action === 'edit') {
+      if (!supabaseClient) {
+        alert('Supabase is not loaded. Please refresh the page.');
+        return;
+      }
+      showLoader('Loading report...');
+      const { data, error } = await supabaseClient.from('ir_cases').select('*').eq('id', id).single();
+      hideLoader();
+      if (error) { console.error(error); alert('Error loading report'); return; }
+      openIrModal({ record: data });
+      return;
+    }
+
+    if (action === 'delete') {
+      if (!supabaseClient) {
+        alert('Supabase is not loaded. Please refresh the page.');
+        return;
+      }
+      if (!confirm('Delete this report? This cannot be undone.')) return;
+      try {
+        showLoader('Deleting...');
+        const { error } = await supabaseClient.from('ir_cases').delete().eq('id', id);
+        hideLoader();
+        if (error) throw error;
+        await fetchIRs(areaFilter.value);
+      } catch (err) {
+        hideLoader(); console.error(err); alert('Error deleting report');
+      }
+      return;
+    }
+  });
+}
+
+/* File input preview text */
+if (ir_file) {
+  ir_file.addEventListener('change', (e) => {
+    if (ir_file_preview) {
+      ir_file_preview.textContent = e.target.files[0] ? e.target.files[0].name : 'No file selected';
+    }
+  });
+}
+
+/* open create modal */
+console.log('Setting up addIrBtn listener, button element:', addIrBtn);
+if (addIrBtn) {
+  console.log('addIrBtn found, attaching listener');
+  addIrBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Add IR button clicked!'); // Debug log
+    try {
+      openIrModal();
+    } catch(err) {
+      console.error('Error in openIrModal:', err);
+      alert('Error opening modal: ' + err.message);
+    }
+  });
+  console.log('addIrBtn listener attached successfully');
+} else {
+  console.error('addIrBtn element not found!');
+  alert('Error: Add Incident button not found. Please refresh the page.');
+}
+
+if (irCancelBtn) {
+  irCancelBtn.addEventListener('click', closeIrModal);
+}
+
+if (refreshBtn) {
+  refreshBtn.addEventListener('click', () => fetchIRs(areaFilter.value));
+}
+
+/* Search / Filter controls */
+if (areaFilter) {
+  areaFilter.addEventListener('change', () => fetchIRs(areaFilter.value));
+}
+if (statusFilter) {
+  statusFilter.addEventListener('change', () => fetchIRs(areaFilter.value));
+}
+if (searchInput) {
+  searchInput.addEventListener('input', debounce(() => fetchIRs(areaFilter.value), 300));
+}
+
+/* =================== CASES (single table) =================== */
+async function loadCases(){
+  if (!supabaseClient) {
+    hideLoader();
+    if (caseTbody) caseTbody.innerHTML = `<tr><td colspan="4" style="color:var(--muted)">Supabase not loaded</td></tr>`;
+    return;
+  }
+  showLoader('Loading cases...');
+  try {
+    const { data, error } = await supabaseClient.from('cases').select('*').order('id', { ascending: false });
+    hideLoader();
+    if (error) throw error;
+    renderCases(data || []);
+  } catch (err) {
+    hideLoader(); console.error('loadCases', err); if (caseTbody) caseTbody.innerHTML = `<tr><td colspan="4">Error</td></tr>`;
+  }
+}
+function renderCases(list){
+  caseTbody.innerHTML = '';
+  if (!list || list.length === 0) {
+    caseTbody.innerHTML = `<tr><td colspan="4" style="color:var(--muted)">No cases</td></tr>`;
+    return;
+  }
+  list.forEach(row => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${escapeHtml(row.case_name||'')}</td><td>${escapeHtml(row.area||'')}</td><td>${escapeHtml(row.status||'')}</td>
+      <td><button class="btn-ghost" data-caseid="${row.id}">Open</button></td>`;
+    tr.querySelector('button').addEventListener('click', () => openCaseModal(row));
+    caseTbody.appendChild(tr);
+  });
+}
+
+
+
+if (detail_case_status && caseSaveBtn && caseCloseBtn) {
+  detail_case_status.addEventListener('change', () => {
+    if (!currentCase) return;
+    if (String(detail_case_status.value).toUpperCase() !== String(originalCaseStatus).toUpperCase()) {
+      caseSaveBtn.style.display = 'inline-block';
+    } else {
+      caseSaveBtn.style.display = 'none';
+    }
+  });
+
+  caseSaveBtn.addEventListener('click', async () => {
+    if (!currentCase) return;
+    if (!supabaseClient) {
+      alert('Supabase is not loaded. Please refresh the page.');
+      return;
+    }
+    const newStatus = detail_case_status.value;
+    if (String(newStatus).toUpperCase() === String(originalCaseStatus).toUpperCase()) { caseSaveBtn.style.display = 'none'; return; }
+    try {
+      showLoader('Saving status...');
+      const { error } = await supabaseClient.from('cases').update({ status: newStatus }).eq('id', currentCase.id);
+      hideLoader();
+      if (error) throw error;
+      originalCaseStatus = newStatus;
+      caseSaveBtn.style.display = 'none';
+      caseSavedMsg.style.opacity = 1;
+      setTimeout(()=> caseSavedMsg.style.opacity = 0, 2000);
+      await loadCases();
+      if (caseModal) caseModal.classList.remove('show');
+    } catch (err) {
+      hideLoader(); console.error('save case status', err); alert('Error saving case status');
+    }
+  });
+
+  caseCloseBtn.addEventListener('click', () => { if (caseModal) caseModal.classList.remove('show'); currentCase = null; });
+}
+
+/* =================== Small helpers =================== */
+function debounce(fn, wait=200){ let t; return (...a)=>{ clearTimeout(t); t = setTimeout(()=>fn(...a), wait); }}
+
+/* =================== Init =================== */
+(async function init(){
+  try {
+    // Wait a bit for Supabase to initialize, then fetch data
+    setTimeout(async () => {
+      if (supabaseClient) {
+        await fetchIRs('all');
+      } else {
+        console.warn('Supabase not initialized yet, skipping initial fetch');
+      }
+    }, 100);
+  } catch (err) {
+    console.error('init', err);
+  }
+})();
+
+/* logout */
+document.getElementById('logoutBtn').addEventListener('click', ()=>{ sessionStorage.clear(); window.location.href = 'index.html'; });
+
+</script>
+</body>
+</html>

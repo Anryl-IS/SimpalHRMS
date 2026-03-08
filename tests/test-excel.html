@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel to HTML Table</title>
+    <style>
+
+body {
+    font-family: 'SF Pro Display', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    padding: 20px;
+}
+
+h1 {
+    color: #0056b3;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 10px;
+}
+
+
+#excelTable {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    margin-top: 20px;
+
+    border-radius: 8px;
+    overflow: hidden; 
+}
+
+
+#excelTable th, 
+#excelTable td {
+    padding: 12px 15px;
+    border: 1px solid #e0e0e0; 
+    text-align: left;
+}
+
+#excelTable th {
+    background-color: #007bff; 
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    position: sticky;
+    top: 0;
+}
+
+
+#excelTable tbody tr:nth-child(even) {
+    background-color: #f8f8f8;
+}
+
+
+#excelTable tbody tr:hover {
+    background-color: #e3f2fd; 
+    cursor: default;
+}
+
+input[type="file"] {
+    border: 2px solid #007bff;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+input[type="file"]:hover {
+    background-color: #e9ecef;
+}
+
+
+#output {
+    margin-top: 30px;
+    
+    max-height: 70vh; 
+    overflow-y: auto; 
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+
+#excelTable td {
+  
+    text-align: inherit; 
+}
+#excelTable td:not(:first-child) {
+
+}
+
+.sheet-header {
+    color: #3700ff; /* Matches header blue */
+    margin-top: 40px;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 3px solid #0056b3; /* Darker border for emphasis */
+}
+
+/* Ensure the output container can scroll when multiple sheets are loaded */
+#output {
+    /* Keep the scrolling rules from the previous CSS */
+    max-height: 70vh; 
+    overflow-y: auto; 
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+}
+    </style>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+    <h1>Excel File Viewer (Tabbed)</h1>
+    <p>Upload an Excel file (.xlsx) to display its content sheet by sheet.</p>
+
+    <input type="file" id="excelFile" accept=".xlsx, .xls">
+
+    <div id="output">
+        <div id="sheet-tabs">
+            </div>
+        <div id="sheet-content">
+            </div>
+    </div>
+
+    <script>
+        document.getElementById('excelFile').addEventListener('change', handleFile, false);
+
+        function handleFile(e) {
+            const files = e.target.files;
+            if (files.length === 0) return;
+
+            const file = files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+ 
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+
+       
+                const htmlString = XLSX.utils.sheet_to_html(worksheet, { id: 'excelTable' });
+                
+
+                document.getElementById('output').innerHTML = htmlString;
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+    document.getElementById('excelFile').addEventListener('change', handleFile, false);
+
+    function handleFile(e) {
+        const files = e.target.files;
+        if (files.length === 0) return;
+
+        const file = files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            
+
+            const workbook = XLSX.read(data, { type: 'array' });
+            
+
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = ''; 
+
+
+            workbook.SheetNames.forEach((sheetName, index) => {
+                const worksheet = workbook.Sheets[sheetName];
+
+
+                const sheetHeader = document.createElement('h2');
+                sheetHeader.textContent = `Sheet: ${sheetName}`;
+                sheetHeader.className = 'sheet-header';
+                outputDiv.appendChild(sheetHeader);
+
+ 
+                const tableId = `excelTable_${index}`;
+                const htmlString = XLSX.utils.sheet_to_html(worksheet, { id: tableId });
+                
+       
+                const tableContainer = document.createElement('div');
+                tableContainer.innerHTML = htmlString;
+                outputDiv.appendChild(tableContainer);
+            });
+        };
+
+        reader.readAsArrayBuffer(file);
+    }
+</script>
+    </script>
+
+</body>
+</html>

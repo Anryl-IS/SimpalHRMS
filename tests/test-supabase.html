@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Supabase Connection Test</title>
+</head>
+<body>
+  <h2>🔍 Testing Supabase Connection...</h2>
+  <pre id="output">Connecting...</pre>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const supabaseUrl = "https://hzafznqoyinfjbqrrerp.supabase.co";
+    const supabaseKey = "sb_publishable_LUMWJYiZf6KyK8u1Hg5wMg_iN3_2K3S";
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    async function testConnection() {
+      try {
+        const { data, error } = await supabase.from("employees").select("*").limit(1);
+
+        if (error) {
+          document.getElementById("output").textContent = "❌ Connection failed:\n" + error.message;
+        } else {
+          document.getElementById("output").textContent = "✅ Connected successfully!\nSample data:\n" + JSON.stringify(data, null, 2);
+        }
+      } catch (err) {
+        document.getElementById("output").textContent = "⚠️ Error: " + err.message;
+      }
+    }
+
+    testConnection();
+  </script>
+</body>
+</html>

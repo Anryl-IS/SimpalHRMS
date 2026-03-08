@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Employee Onboarding</title>
+  <link rel="icon" type="image/png" href="https://i.imgur.com/6SF5KQG.png" />
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: url('https://i.imgur.com/u4fLKos.jpeg') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      margin: 0;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    h2 {
+      text-align: center;
+      color: #fff;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+      animation: fadeDown 0.6s ease;
+    }
+
+    @keyframes fadeDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    form {
+      background: #1e1e1e;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      max-width: 700px;
+      width: 100%;
+      animation: fadeIn 0.8s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.97);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    form input,
+    form select {
+      width: 100%;
+      margin-bottom: 14px;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #333;
+      background: #2a2a2a;
+      color: #fff;
+      font-size: 15px;
+    }
+
+    form input:focus,
+    form select:focus {
+      outline: none;
+      border-color: #00e676;
+      box-shadow: 0 0 8px #00e67680;
+      transform: scale(1.02);
+    }
+
+    form label {
+      font-size: 14px;
+      color: #b3b3b3;
+    }
+
+    form button {
+      background: #fff;
+      color: #000;
+      padding: 12px 20px;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+      transition: all 0.2s ease;
+    }
+
+    form button:hover {
+      background: #1de9b6;
+      box-shadow: 0 0 12px #00e676b0;
+      transform: translateY(-2px);
+    }
+
+    #photoPreview {
+      display: none;
+      margin-top: 10px;
+      width: 120px;
+      height: 120px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 2px solid #00e67660;
+      transition: all 0.3s ease;
+    }
+
+    #photoPreview.active {
+      display: block;
+      animation: popIn 0.4s ease;
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .loader {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      justify-content: center;
+      align-items: center;
+      color: #00e676;
+      font-size: 20px;
+      font-weight: bold;
+      z-index: 1000;
+      flex-direction: column;
+    }
+
+    .loader.active {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .spinner {
+      width: 45px;
+      height: 45px;
+      border: 4px solid #333;
+      border-top: 4px solid #00e676;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 15px;
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    #logoutBtn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #ff3b30;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 18px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s ease;
+    }
+
+    #logoutBtn:hover {
+      background: #ff5252;
+      box-shadow: 0 0 10px #ff3b30a0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <button type="button" id="logoutBtn">Logout</button>
+
+  <form id="addEmpForm" enctype="multipart/form-data">
+    <h2>Add New Employee</h2>
+
+    <input id="emp_name_english" placeholder="Full Name" required />
+    <select id="emp_sex">
+      <option value="">Select Sex</option>
+      <option>Male</option>
+      <option>Female</option>
+    </select>
+    <input id="emp_blood_type" placeholder="Blood Type (e.g., O, A, B)" />
+    <label>Date of Birth:</label>
+    <input id="emp_dob" type="date" />
+    <input id="emp_height" placeholder="Height (cm)" type="number" />
+    <input id="emp_weight" placeholder="Weight (kg)" type="number" />
+    <input id="emp_position" placeholder="Position" />
+
+    <label>Designation:</label>
+    <select id="emp_designation" required>
+      <option value="">Select Designation</option>
+      <option value="LDS">LDS</option>
+      <option value="LDN">LDN</option>
+      <option value="MDS">MDS</option>
+      <option value="MDN">MDN</option>
+      <option value="COT">COT</option>
+      <option value="ADMIN">ADMIN</option>
+    </select>
+
+    <input id="emp_sss" placeholder="SSS Number" />
+    <input id="emp_philhealth" placeholder="PhilHealth Number" />
+    <input id="emp_pagibig" placeholder="Pag-IBIG Number" />
+    <input id="emp_id_card" placeholder="ID Card Number" />
+    <input id="emp_email" placeholder="Email" type="email" />
+    <input id="emp_mobile" placeholder="Mobile Number" />
+    <input id="emp_residence_address" placeholder="Residence Address" />
+    <input id="emp_residence_postal" placeholder="Residence Postal Code" />
+    <input id="emp_present_address" placeholder="Present Address" />
+    <input id="emp_present_postal" placeholder="Present Postal Code" />
+
+    <label>Upload Employee Photo:</label>
+    <input id="emp_photo" type="file" accept="image/*" required />
+    <img id="photoPreview" alt="Photo Preview" />
+
+    <label>Upload 201 File (PDF, DOCX, etc.):</label>
+    <input id="emp_201file" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png" required />
+
+    <button type="submit">Add Employee</button>
+  </form>
+
+  <div id="loader" class="loader">
+    <div class="spinner"></div>
+    <div id="loaderTxt">Processing...</div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://hzafznqoyinfjbqrrerp.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6YWZ6bnFveWluZmpicXJyZXJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MDYzMzcsImV4cCI6MjA3NjA4MjMzN30.qQFFQ6fzqBXxl63JG4JWNZ0JR0ZVnoyiU65J4VlDNG8";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const loader = document.getElementById("loader");
+    const loaderTxt = document.getElementById("loaderTxt");
+    const addEmpForm = document.getElementById("addEmpForm");
+    const photoInput = document.getElementById("emp_photo");
+    const photoPreview = document.getElementById("photoPreview");
+    const file201Input = document.getElementById("emp_201file");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    // Photo Preview
+    photoInput.addEventListener("change", () => {
+      const file = photoInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          photoPreview.src = e.target.result;
+          photoPreview.classList.add("active");
+        };
+        reader.readAsDataURL(file);
+      } else {
+        photoPreview.classList.remove("active");
+      }
+    });
+
+    // Form Submit
+    addEmpForm.onsubmit = async (e) => {
+      e.preventDefault();
+
+      const name_english = document.getElementById("emp_name_english").value.trim();
+      const sex = document.getElementById("emp_sex").value;
+      const blood_type = document.getElementById("emp_blood_type").value.trim();
+      const dob = document.getElementById("emp_dob").value;
+      const height = document.getElementById("emp_height").value;
+      const weight = document.getElementById("emp_weight").value;
+      const position = document.getElementById("emp_position").value.trim();
+      const designation = document.getElementById("emp_designation").value;
+      const sss = document.getElementById("emp_sss").value.trim();
+      const philhealth = document.getElementById("emp_philhealth").value.trim();
+      const pagibig = document.getElementById("emp_pagibig").value.trim();
+      const id_card = document.getElementById("emp_id_card").value.trim();
+      const email = document.getElementById("emp_email").value.trim();
+      const mobile = document.getElementById("emp_mobile").value.trim();
+      const residence_address = document.getElementById("emp_residence_address").value.trim();
+      const residence_postal = document.getElementById("emp_residence_postal").value.trim();
+      const present_address = document.getElementById("emp_present_address").value.trim();
+      const present_postal = document.getElementById("emp_present_postal").value.trim();
+      const photoFile = photoInput.files[0];
+      const file201 = file201Input.files[0];
+
+      if (!photoFile || !file201) {
+        alert("Please upload both the employee photo and 201 file.");
+        return;
+      }
+
+      try {
+        loader.classList.add("active");
+        loaderTxt.textContent = "Uploading employee photo...";
+
+        const photoExt = photoFile.name.split('.').pop();
+        const photoName = `${Date.now()}_${name_english.replace(/\s+/g, "_")}.${photoExt}`;
+        const { error: photoError } = await supabaseClient.storage.from("employee_photos").upload(photoName, photoFile);
+        if (photoError) throw photoError;
+        const { data: photoPublic } = supabaseClient.storage.from("employee_photos").getPublicUrl(photoName);
+        const photo_url = photoPublic.publicUrl;
+
+        loaderTxt.textContent = "Uploading 201 file...";
+        const fileExt201 = file201.name.split('.').pop();
+        const fileName201 = `${Date.now()}_${name_english.replace(/\s+/g, "_")}_201.${fileExt201}`;
+        const { error: fileError } = await supabaseClient.storage.from("employee_201files").upload(fileName201, file201);
+        if (fileError) throw fileError;
+        const { data: filePublic } = supabaseClient.storage.from("employee_201files").getPublicUrl(fileName201);
+        const file_201_url = filePublic.publicUrl;
+
+        loaderTxt.textContent = "Saving employee data...";
+        const { error: insertError } = await supabaseClient.from("employees").insert([{
+          name_english, sex, blood_type, dob, height, weight, position, designation,
+          sss, philhealth, pagibig, id_card, email, mobile,
+          residence_address, residence_postal, present_address, present_postal,
+          photo_url, file_201_url
+        }]);
+        if (insertError) throw insertError;
+
+        loader.classList.remove("active");
+        alert("✅ Employee and 201 file added successfully!");
+        addEmpForm.reset();
+        photoPreview.classList.remove("active");
+
+      } catch (err) {
+        loader.classList.remove("active");
+        console.error("Error:", err);
+        alert("❌ Error adding employee: " + err.message);
+      }
+    };
+
+    // Logout
+    logoutBtn.addEventListener("click", async () => {
+      const confirmLogout = confirm("Are you sure you want to log out?");
+      if (!confirmLogout) return;
+
+      try {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) throw error;
+
+        alert("You’ve been logged out.");
+        window.location.href = "../index.html";
+      } catch (err) {
+        console.error("Logout error:", err.message);
+        alert("❌ Logout failed: " + err.message);
+      }
+    });
+  </script>
+
+</body>
+
+</html>

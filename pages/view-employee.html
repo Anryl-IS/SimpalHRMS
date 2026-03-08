@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Profile - Simpal HRMS</title>
+  <link rel="icon" type="image/png" href="https://i.imgur.com/6SF5KQG.png">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, sans-serif;
+      background: #1c1c1e;
+      color: #f2f2f7;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 40px 10px;
+    }
+
+    .container {
+      background: #2c2c2e;
+      padding: 30px;
+      border-radius: 20px;
+      width: 1000px;
+      max-width: 100%;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+      animation: fadeUp 0.6s forwards;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Profile Header */
+    .profile-header {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #3a3a3c;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+      gap: 25px;
+    }
+
+    .profile-pic {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      background: #fff;
+      flex-shrink: 0;
+    }
+
+    .profile-pic img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-info h2 {
+      margin: 0 0 8px;
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .profile-info p {
+      margin: 4px 0;
+      font-size: 16px;
+      color: #d1d1d6;
+    }
+
+    /* Profile Body */
+    .profile-body {
+      display: flex;
+      gap: 25px;
+      flex-wrap: wrap;
+    }
+
+    .profile-section {
+      flex: 1;
+      min-width: 300px;
+      background: #1c1c1e;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .profile-section h3 {
+      font-size: 18px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #3a3a3c;
+      padding-bottom: 8px;
+    }
+
+    label {
+      font-weight: 600;
+      margin-top: 15px;
+      display: block;
+      color: #f2f2f7;
+      font-size: 14px;
+    }
+
+    input,
+    textarea {
+      width: 80%;
+      padding: 12px 14px;
+      margin-top: 6px;
+      border-radius: 12px;
+      border: 1px solid #3a3a3c;
+      background: #2c2c2e;
+      color: #f2f2f7;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #0a84ff;
+      box-shadow: 0 0 8px rgba(10, 132, 255, 0.3);
+      background: #3a3a3c;
+    }
+
+    textarea {
+      resize: none;
+    }
+
+    /* Buttons */
+    .btn-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 30px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 12px 24px;
+      border-radius: 25px;
+      border: none;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    #updateBtn {
+      background-color: #0a84ff;
+      color: #fff;
+    }
+
+    #updateBtn:hover {
+      background-color: #0066cc;
+      transform: scale(1.05);
+    }
+
+    #backBtn {
+      background-color: #ff453a;
+      color: #fff;
+    }
+
+    #backBtn:hover {
+      background-color: #e60000;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+      <div class="profile-pic">
+        <img src="https://i.imgur.com/6SF5KQG.png" alt="Profile">
+      </div>
+      <div class="profile-info">
+        <h2 id="profileName">Employee Name</h2>
+        <p id="profileRole">Employee Role • Department</p>
+        <p id="profileEmail">Email</p>
+      </div>
+    </div>
+
+    <!-- Profile Body -->
+    <div class="profile-body">
+      <!-- Left Section -->
+      <div class="profile-section">
+        <h3>Personal Information</h3>
+        <label for="first_name">First Name</label>
+        <input type="text" id="first_name">
+
+        <label for="last_name">Last Name</label>
+        <input type="text" id="last_name">
+
+        <label for="civil_status">Civil Status</label>
+        <input type="text" id="civil_status">
+
+        <label for="contact_number">Contact Number</label>
+        <input type="text" id="contact_number">
+
+        <label for="emergency_contact">Emergency Contact</label>
+        <input type="text" id="emergency_contact">
+
+        <label for="date_hired">Date Hired</label>
+        <input type="date" id="date_hired">
+      </div>
+
+      <!-- Right Section -->
+      <div class="profile-section">
+        <h3>Work & Benefits</h3>
+        <label for="role">Role</label>
+        <input type="text" id="role">
+
+        <label for="department">Department</label>
+        <input type="text" id="department">
+
+        <label for="salary">Salary</label>
+        <input type="number" id="salary">
+
+        <label for="leave_credits">Leave Credits</label>
+        <input type="number" id="leave_credits">
+
+        <label for="cash_advances">Cash Advances</label>
+        <input type="text" id="cash_advances" readonly>
+
+        <label for="sss">SSS Number</label>
+        <input type="text" id="sss">
+
+        <label for="philhealth">PhilHealth Number</label>
+        <input type="text" id="philhealth">
+
+        <label for="pagibig">Pag-IBIG Number</label>
+        <input type="text" id="pagibig">
+
+        <label for="passed_reports">Passed Accomplishment Reports</label>
+        <textarea id="passed_reports" rows="3"></textarea>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-container">
+      <button id="updateBtn">Update</button>
+      <button id="backBtn">Back</button>
+    </div>
+  </div>
+
+  <script>
+    let employees = [
+      { id: 1, first: "Edwin Angelo", last: "Catequista", email: "masabadsigelo@gmail.com", role: "Developer", department: "IT", salary: 50000, date: "2025-01-15", civil_status: "Single", leave_credits: 15, cash_advances: 0, passed_reports: "Report 1\nReport 2", sss: "123-4567890-1", philhealth: "12-345678901-2", pagibig: "1234-5678-9101", contact_number: "09171234567", emergency_contact: "Juan Dela Cruz - 09179876543" },
+      { id: 2, first: "Jay Ryan", last: "Lim", email: "jay.ryan@example.com", role: "IT DEPARTMENT HEAD", department: "IT", salary: 55000, date: "2025-02-20", civil_status: "Married", leave_credits: 12, cash_advances: 5000, passed_reports: "Report A\nReport B", sss: "987-6543210-9", philhealth: "98-765432109-8", pagibig: "9876-5432-1098", contact_number: "09981234567", emergency_contact: "Maria Lim - 09989998888" }
+    ];
+
+    const empId = sessionStorage.getItem("viewEmployeeId");
+    let emp = employees.find(e => e.id == empId);
+
+    if (emp) {
+      document.getElementById("first_name").value = emp.first;
+      document.getElementById("last_name").value = emp.last;
+      document.getElementById("role").value = emp.role;
+      document.getElementById("department").value = emp.department;
+      document.getElementById("civil_status").value = emp.civil_status;
+      document.getElementById("sss").value = emp.sss;
+      document.getElementById("philhealth").value = emp.philhealth;
+      document.getElementById("pagibig").value = emp.pagibig;
+      document.getElementById("contact_number").value = emp.contact_number;
+      document.getElementById("emergency_contact").value = emp.emergency_contact;
+      document.getElementById("leave_credits").value = emp.leave_credits;
+      document.getElementById("salary").value = emp.salary;
+      document.getElementById("cash_advances").value = emp.cash_advances ? emp.cash_advances : "No active cash advances";
+      document.getElementById("passed_reports").value = emp.passed_reports;
+      document.getElementById("date_hired").value = emp.date;
+
+      // Update top header info
+      document.getElementById("profileName").textContent = emp.first + " " + emp.last;
+      document.getElementById("profileRole").textContent = emp.role + " • " + emp.department;
+      document.getElementById("profileEmail").textContent = emp.email;
+    }
+
+    // Update employee info
+    document.getElementById("updateBtn").addEventListener("click", () => {
+      emp.first = document.getElementById("first_name").value;
+      emp.last = document.getElementById("last_name").value;
+      emp.role = document.getElementById("role").value;
+      emp.department = document.getElementById("department").value;
+      emp.civil_status = document.getElementById("civil_status").value;
+      emp.sss = document.getElementById("sss").value;
+      emp.philhealth = document.getElementById("philhealth").value;
+      emp.pagibig = document.getElementById("pagibig").value;
+      emp.contact_number = document.getElementById("contact_number").value;
+      emp.emergency_contact = document.getElementById("emergency_contact").value;
+      emp.leave_credits = parseInt(document.getElementById("leave_credits").value);
+      emp.salary = parseInt(document.getElementById("salary").value);
+      emp.cash_advances = document.getElementById("cash_advances").value === "No active cash advances" ? 0 : parseInt(document.getElementById("cash_advances").value);
+      emp.passed_reports = document.getElementById("passed_reports").value;
+      emp.date = document.getElementById("date_hired").value;
+
+      alert("Employee info updated successfully!");
+    });
+
+    // Back to search page
+    document.getElementById("backBtn").addEventListener("click", () => {
+      window.location.href = "../index.html";
+    });
+  </script>
+
+</body>
+
+</html>

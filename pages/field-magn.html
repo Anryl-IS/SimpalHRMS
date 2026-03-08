@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MDN Costumer Service Representative Dashboard</title>
+<link rel="icon" type="image/png" href="https://i.imgur.com/6SF5KQG.png">
+<script src="https://unpkg.com/@supabase/supabase-js"></script>
+<style>
+/* === BASE STYLES === */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Segoe UI", Roboto, "Helvetica Neue", sans-serif; background: #121212; color: #f5f5f7; display: flex; min-height: 100vh; overflow-x: hidden; }
+/* SIDEBAR */
+.sidebar { width: 240px; background: #1e1e1f; height: 100vh; display: flex; flex-direction: column; padding: 20px 0; border-right: 1px solid #2d2d2f; position: fixed; top: 0; left: 0; z-index: 10; }
+.logo-circle { width: 90px; height: 90px; border-radius: 50%; background: #fff; display:flex; justify-content:center; align-items:center; margin: 0 auto 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);}
+.logo-circle img { width: 65px; height: 65px; }
+.sidebar h2 { text-align:center; font-size:16px; color:#0a84ff; margin-bottom:20px; }
+/* NAV BUTTONS */
+.nav { display:flex; flex-direction:column; gap:12px; padding:0 20px; }
+.nav button { border:none; background:#2b2b2d; padding:10px 16px; border-radius:8px; font-size:15px; color:#f5f5f7; cursor:pointer; transition: all 0.3s ease; }
+.nav button:hover, .nav button.active { background:#0a84ff; color:#fff; transform: translateX(5px); box-shadow: 0 0 10px rgba(10,132,255,0.4); }
+/* LOGOUT */
+#logoutBtn { margin: auto 20px 20px; background:#ff3b30; color:#fff; border:none; padding:10px 22px; border-radius:25px; font-weight:600; cursor:pointer; transition:0.25s; }
+#logoutBtn:hover { background:#e03228; transform:scale(1.03); }
+/* MAIN AREA */
+.main { margin-left: 240px; flex:1; padding:36px; background:#121212; min-height:100vh; }
+h1 { text-align:center; margin-bottom:20px; color:#ffffff; font-weight:700; }
+/* TABLE */
+table { width:100%; border-collapse:collapse; border-radius:12px; overflow:hidden; box-shadow:0 8px 20px rgba(0,0,0,0.35); margin-top:12px; background:#1e1e1f; }
+th, td { padding:12px 14px; text-align:left; font-size:14px; }
+th { background:#2a2a2c; color:#0a84ff; font-weight:600; }
+tbody tr:nth-child(even) { background: #1b1b1d; }
+tbody tr:hover { background: #0a84ff20; }
+td { color:#e5e5e7; vertical-align: middle; }
+/* ACTION BUTTONS */
+.action-btn { padding:6px 10px; border-radius:8px; border:none; cursor:pointer; font-size:13px; margin-right:6px; transition: transform 0.2s ease, box-shadow 0.2s ease;}
+.action-btn:hover { transform: scale(1.05); box-shadow:0 2px 8px rgba(0,0,0,0.3);}
+.action-btn.edit { background:#00b37e; color:white; }
+.action-btn.delete { background:#ff3b30; color:white; }
+.action-btn.view { background:#0a84ff; color:white; }
+/* ADD BUTTON */
+#addIRBtn { background: linear-gradient(135deg,#0a84ff,#007aff); color:#fff; border:none; padding:10px 16px; border-radius:10px; font-weight:700; cursor:pointer; margin-bottom:12px; box-shadow:0 4px 12px rgba(0,132,255,0.4); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+#addIRBtn:hover { transform:scale(1.03); box-shadow:0 6px 18px rgba(0,132,255,0.45); }
+/* MODAL */
+.modal { display:none; position:fixed; inset:0; width:100%; height:100%; background: rgba(8,8,8,0.7); justify-content:center; align-items:center; z-index: 99999; }
+.modal.show { display:flex; }
+.modal-card { background: #121212; width:480px; max-width:95%; border-radius:14px; padding:24px; box-shadow: 0 12px 36px rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.05);}
+.modal-card h3 { color:#0a84ff; margin-bottom:16px; font-weight:700; }
+input, select { width:100%; padding:10px 12px; border-radius:10px; border:1px solid #2d2d2f; background:#161616; color:#fff; font-size:14px; margin-bottom:10px; }
+.modal-actions { display:flex; gap:10px; justify-content:flex-end; }
+#formMsg { margin-top:10px; color:#ffcc00; display:none; }
+/* RESPONSIVE */
+@media(max-width:640px){ .sidebar { position:relative; width:100%; height:auto; flex-direction:row; overflow-x:auto; } .main { margin-left:0; padding:20px 10px; } table { font-size:13px; } }
+/* WATERMARK */
+.watermark { text-align:center; margin-top:28px; color:#8e8e93; font-size:12px; opacity:0.9; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo-circle"><img src="https://i.imgur.com/6SF5KQG.png" alt="logo"></div>
+  <h2>MDN Costumer Service Representative Dashboard</h2>
+  <nav class="nav">
+    <button class="tab-btn active">Incident Reports</button>
+  </nav>
+  <button id="logoutBtn">Logout</button>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <h1>Incident Reports</h1>
+
+  <button id="addIRBtn">+ Add Incident Report</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Agent Name</th>
+        <th>File</th>
+        <th>Date Posted</th>
+        <th>Area</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="irTbody"></tbody>
+  </table>
+
+  <div class="watermark">Designed & Developed by: <strong>Edwin Angelo Catequista</strong></div>
+</main>
+
+<!-- MODAL -->
+<div class="modal" id="irModal">
+  <div class="modal-card">
+    <h3 id="modalTitle">Add Incident Report</h3>
+    <form id="irForm">
+      <input type="hidden" id="irId">
+      <input id="agent_name" type="text" placeholder="Agent name" required>
+      <input id="area" type="text" placeholder="Area" required>
+      <input id="date_posted" type="date" required>
+      <select id="status" required>
+        <option value="">Select Status</option>
+        <option value="Open">Open</option>
+        <option value="Closed">Closed</option>
+        <option value="Pending">Pending</option>
+      </select>
+      <input id="file" type="file" accept=".pdf,.doc,.docx,.jpg,.png">
+      <div id="filePreview" style="margin-bottom:10px;"></div>
+      <div class="modal-actions">
+        <button type="button" id="closeModalBtn" class="action-btn" style="background:#444;">Cancel</button>
+        <button type="submit" id="saveBtn" class="action-btn" style="background:#0a84ff;">Save</button>
+      </div>
+      <div id="formMsg"></div>
+    </form>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://hzafznqoyinfjbqrrerp.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6YWZ6bnFveWluZmpicXJyZXJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MDYzMzcsImV4cCI6MjA3NjA4MjMzN30.qQFFQ6fzqBXxl63JG4JWNZ0JR0ZVnoyiU65J4VlDNG8';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!sessionStorage.getItem('loggedIn')) {
+    window.location.href = '../index.html';
+  }
+
+  const irTbody = document.getElementById('irTbody');
+  const addBtn = document.getElementById('addIRBtn');
+  const modal = document.getElementById('irModal');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  const form = document.getElementById('irForm');
+  const saveBtn = document.getElementById('saveBtn');
+  const fileInput = document.getElementById('file');
+  const filePreview = document.getElementById('filePreview');
+  const modalTitle = document.getElementById('modalTitle');
+  const irIdInput = document.getElementById('irId');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  logoutBtn.addEventListener('click', () => {
+    sessionStorage.clear();
+    window.location.href = '../index.html';
+  });
+
+  async function fetchIRs() {
+    const { data, error } = await supabase
+      .from('ir_mag_norte')
+      .select('*')
+      .order('date_posted', { ascending: false });
+    if (error) {
+      console.error('Error fetching IRs:', error);
+      irTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Failed to load data.</td></tr>';
+      return;
+    }
+    irTbody.innerHTML = '';
+    if (!data.length) {
+      irTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No Incident Reports</td></tr>';
+      return;
+    }
+    data.forEach(ir => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${ir.agent_name}</td>
+        <td>${ir.file_name ? `<a href="${ir.file_url}" target="_blank">${ir.file_name}</a>` : ''}</td>
+        <td>${new Date(ir.date_posted).toLocaleDateString()}</td>
+        <td>${ir.area}</td>
+        <td>${ir.status}</td>
+        <td>
+          <button class="action-btn edit" data-id="${ir.id}">Edit</button>
+          <button class="action-btn delete" data-id="${ir.id}">Delete</button>
+          ${ir.file_url ? `<button class="action-btn view" data-url="${ir.file_url}">View</button>` : ''}
+        </td>
+      `;
+      irTbody.appendChild(tr);
+    });
+  }
+
+  function openModal(edit = false, ir = null) {
+    modal.classList.add('show');
+    if (edit && ir) {
+      modalTitle.textContent = 'Edit Incident Report';
+      irIdInput.value = ir.id;
+      document.getElementById('agent_name').value = ir.agent_name;
+      document.getElementById('area').value = ir.area;
+      document.getElementById('date_posted').value = ir.date_posted;
+      document.getElementById('status').value = ir.status;
+      filePreview.innerHTML = ir.file_name ? `<a href="${ir.file_url}" target="_blank">${ir.file_name}</a>` : '';
+    } else {
+      modalTitle.textContent = 'Add Incident Report';
+      form.reset();
+      irIdInput.value = '';
+      filePreview.innerHTML = '';
+    }
+  }
+
+  addBtn.addEventListener('click', () => openModal());
+  closeModalBtn.addEventListener('click', () => modal.classList.remove('show'));
+
+  irTbody.addEventListener('click', async e => {
+    const id = e.target.dataset.id;
+    if (e.target.classList.contains('edit')) {
+      const { data } = await supabase.from('ir_mag_norte').select('*').eq('id', id).single();
+      openModal(true, data);
+    }
+    if (e.target.classList.contains('delete')) {
+      if (confirm('Delete this report?')) {
+        await supabase.from('ir_mag_norte').delete().eq('id', id);
+        fetchIRs();
+      }
+    }
+    if (e.target.classList.contains('view')) {
+      window.open(e.target.dataset.url, '_blank');
+    }
+  });
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
+    const agent_name = document.getElementById('agent_name').value;
+    const area = document.getElementById('area').value;
+    const date_posted = document.getElementById('date_posted').value;
+    const status = document.getElementById('status').value;
+    const file = fileInput.files[0];
+
+    let file_name = '';
+    let file_url = '';
+
+    if (file) {
+      file_name = `${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('incident_reports_sales')
+        .upload(file_name, file);
+      if (uploadError) {
+        alert('File upload failed!');
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save';
+        return;
+      }
+      const { data: publicURL } = supabase.storage
+        .from('incident_reports_sales')
+        .getPublicUrl(file_name);
+      file_url = publicURL.publicUrl;
+    }
+
+    const payload = { agent_name, area, date_posted, status, file_name, file_url };
+
+    if (irIdInput.value) {
+      await supabase.from('ir_mag_norte').update(payload).eq('id', irIdInput.value);
+    } else {
+      await supabase.from('ir_mag_norte').insert([payload]);
+    }
+
+    modal.classList.remove('show');
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save';
+    fetchIRs();
+  });
+
+  fetchIRs();
+});
+</script>
+</body>
+</html>

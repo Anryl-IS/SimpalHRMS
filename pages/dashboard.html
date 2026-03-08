@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simpal HRMS</title>
+  <link rel="icon" type="image/png" href="https://i.imgur.com/6SF5KQG.png">
+  <style>
+    body {
+      font-family:-apple-system, BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+      margin:0; background:#1c1c1e; color:#f2f2f7; display:flex; overflow-x:hidden;
+    }
+    .sidebar {
+      width:250px; background:#2c2c2e; height:100vh; display:flex; flex-direction:column;
+      padding:20px 0; border-right:1px solid #3a3a3c; position:fixed; left:0; top:0;
+      animation:slideIn 0.8s ease;
+    }
+    @keyframes slideIn{from{transform:translateX(-100%);}to{transform:translateX(0);}}
+    .sidebar h2{ text-align:center; font-size:18px; color:#0a84ff; margin:20px 0 30px;}
+    .nav{display:flex; flex-direction:column; gap:10px; padding:0 20px;}
+    .nav button{
+      text-align:left; border:none; background:#3a3a3c; padding:12px 15px;
+      border-radius:12px; font-size:15px; color:#f2f2f7; cursor:pointer;
+      transition: all 0.3s ease;
+    }
+    .nav button:hover, .nav button.active {
+      background:#0a84ff; color:#fff; transform:translateX(6px) scale(1.05);
+      box-shadow:0 0 10px rgba(10,132,255,0.6);
+    }
+    .logo-circle{
+      width:110px;height:110px;border-radius:50%;background:#fff;display:flex;
+      justify-content:center;align-items:center;margin:0 auto 10px;box-shadow:0 4px 12px rgba(0,0,0,0.3);
+      transform:scale(0);animation:popIn 0.6s forwards 0.3s;
+    }
+    .logo-circle img{width:80px;height:80px;}
+    @keyframes popIn{to{transform:scale(1);}}
+    .main{margin-left:250px;flex:1;padding:30px;min-height:100vh;}
+    h1{text-align:center;margin-bottom:25px;font-weight:700;animation:fadeDrop 0.8s ease;}
+    @keyframes fadeDrop{from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);}}
+    .tab-content{display:none;opacity:0;transform:translateY(20px);transition:opacity 0.6s ease,transform 0.6s ease;}
+    .tab-content.active{display:block;opacity:1;transform:translateY(0);}
+    .search-container {display:flex; gap:10px; margin-bottom:15px; justify-content:center;}
+    .search-container input {
+      flex:1; max-width:350px; padding:12px 15px; border-radius:20px;
+      border:1px solid #3a3a3c; background:#2c2c2e; color:#f2f2f7; font-size:14px;
+      transition:0.3s;
+    }
+    .search-container input:focus {border-color:#0a84ff; box-shadow:0 0 8px rgba(10,132,255,0.6); outline:none;}
+    .search-container button {
+      padding:12px 20px; border:none; border-radius:20px; background:#0a84ff;
+      color:#fff; font-weight:600; cursor:pointer; transition:0.3s;
+    }
+    .search-container button:hover { background:#0066cc; transform:scale(1.05); }
+    table{width:100%;border-collapse:collapse;margin-top:15px;background:#2c2c2e;border-radius:12px;overflow:hidden;
+      box-shadow:0 4px 10px rgba(0,0,0,0.3);}
+    table th, table td{padding:12px;text-align:left;border-bottom:1px solid #444;}
+    table th{background:#3a3a3c;font-size:14px;color:#0a84ff;}
+    table td{font-size:13px;}
+    table tr:hover{background:#444;cursor:pointer;}
+    form{display:flex;flex-direction:column;gap:12px;margin-top:15px;}
+    form input, form button {
+      padding:12px; border-radius:12px; border:1px solid #3a3a3c; background:#2c2c2e; color:#f2f2f7;
+    }
+    form input:focus{border-color:#0a84ff;box-shadow:0 0 8px rgba(10,132,255,0.5);outline:none;}
+    form button{background:#0a84ff;cursor:pointer;font-weight:600;}
+    form button:hover{background:#0066cc;transform:scale(1.03);}
+    #logoutBtn{margin:20px;background:#0a84ff;color:#fff;border:none;padding:10px 20px;border-radius:25px;font-weight:600;cursor:pointer;transition:0.3s;}
+    #logoutBtn:hover{background:#0066cc;transform:scale(1.05);}
+    .loader-overlay {position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(28,28,30,0.95); display:flex; justify-content:center; align-items:center; flex-direction:column;
+      z-index:9999; opacity:0; visibility:hidden; transition:opacity 0.4s ease;}
+    .loader-overlay.active { opacity:1; visibility:visible; }
+    .spinner {width:60px;height:60px;border:6px solid #3a3a3c;border-top:6px solid #0a84ff;
+      border-radius:50%;animation:spin 1s linear infinite;}
+    @keyframes spin {100%{transform:rotate(360deg);}}
+    .loader-overlay p { margin-top:15px; color:#f2f2f7; font-size:16px; }
+    #printReports {margin:15px 0; background:#0a84ff; color:#fff; border:none;
+      padding:10px 18px; border-radius:20px; font-weight:600; cursor:pointer; transition:0.3s;}
+    #printReports:hover { background:#0066cc; transform:scale(1.05); }
+    .watermark{text-align:center;font-size:12px;margin-top:20px;color:#8e8e93;}
+    .modal {position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7);
+      display:none; justify-content:center; align-items:center; z-index:10000;}
+    .modal-content {background:#1c1c1e; padding:25px; border-radius:20px; width:480px;
+      box-shadow:0 6px 20px rgba(0,0,0,0.5); color:#f2f2f7; animation:fadeIn 0.4s ease;}
+    @keyframes fadeIn { from{opacity:0; transform:scale(0.9);} to{opacity:1; transform:scale(1);} }
+    .modal h2 { margin-top:0; color:#0a84ff; }
+    .modal .info { margin:8px 0; font-size:14px; }
+    .modal .info span { font-weight:600; color:#fff; }
+    .closeBtn {float:right; font-size:20px; font-weight:bold; color:#aaa; cursor:pointer; transition:0.3s;}
+    .closeBtn:hover { color:#fff; }
+    .modal-actions {margin-top:20px; display:flex; gap:12px; justify-content:flex-end;}
+    .modal-actions button {padding:10px 16px; border:none; border-radius:10px; cursor:pointer;
+      font-weight:600; font-size:14px; transition:0.3s;}
+    #editBtn { background:#0a84ff; color:#fff; }
+    #editBtn:hover { background:#006edc; }
+    #deleteBtn { background:#ff3b30; color:#fff; }
+    #deleteBtn:hover { background:#cc2c23; }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo-circle"><img src="https://i.imgur.com/6SF5KQG.png"></div>
+    <h2>Simpal HRMS</h2>
+    <nav class="nav">
+      <button class="tab-btn active" data-tab="searchTab"> Search</button>
+      <button class="tab-btn" data-tab="addTab"> Add Employee</button>
+      <button class="tab-btn" data-tab="reportsTab"> Reports</button>
+      <button class="tab-btn" data-tab="databaseTab"> Database</button>
+      <button class="tab-btn" data-tab="attendanceTab"> Attendance</button>
+      <button class="tab-btn" data-tab="performanceTab"> Performance</button>
+      <button class="tab-btn" data-tab="onboardingTab"> Onboarding</button>
+      <button class="tab-btn" data-tab="timesheetTab"> Timesheets</button>
+      <button class="tab-btn" data-tab="learningTab"> Learning</button>
+      <button class="tab-btn" data-tab="shiftTab"> Shifts</button>
+      <button class="tab-btn" data-tab="caseTab"> Cases</button>
+    </nav>
+    <button id="logoutBtn"> Logout</button>
+  </aside>
+
+  <!-- Loader overlay -->
+  <div class="loader-overlay" id="loader">
+    <div class="spinner"></div>
+    <p>Logging out, please wait...</p>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <h1>HRMS Dashboard</h1>
+
+    <!-- Search -->
+    <div id="searchTab" class="tab-content active">
+      <h2>Search Employees</h2>
+      <div class="search-container">
+        <input type="text" id="search" placeholder="Search employee...">
+        <button id="searchBtn">Search</button>
+      </div>
+      <table id="employeeTable">
+        <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- Add Employee -->
+    <div id="addTab" class="tab-content">
+      <h2>Add Employee</h2>
+      <form id="employeeForm">
+        <input id="first_name" placeholder="First Name" required>
+        <input id="last_name" placeholder="Last Name" required>
+        <input id="email" placeholder="Email" required>
+        <input id="role" placeholder="Role" required>
+        <input id="salary" type="number" placeholder="Salary" required>
+        <input id="date_hired" type="date" required>
+        <button type="submit">Add Employee</button>
+      </form>
+    </div>
+
+    <!-- Reports -->
+    <div id="reportsTab" class="tab-content">
+      <h2>Employee Reports</h2>
+      <button id="printReports">🖨️ Print Reports</button>
+      <table id="reportsTable">
+        <thead><tr><th>Name</th><th>Attendance</th><th>Reports</th></tr></thead>
+        <tbody id="reportsTbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Database -->
+    <div id="databaseTab" class="tab-content">
+      <h2>Employee Database</h2>
+      <table><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody id="dbTbody"></tbody></table>
+    </div>
+
+    <!-- Attendance -->
+    <div id="attendanceTab" class="tab-content">
+      <h2>Attendance Tracker</h2>
+      <table><thead><tr><th>Name</th><th>Status</th></tr></thead><tbody id="attendanceTbody"></tbody></table>
+    </div>
+
+    <!-- Performance -->
+    <div id="performanceTab" class="tab-content">
+      <h2>Performance Management</h2>
+      <table><thead><tr><th>Name</th><th>KPI</th><th>Remarks</th></tr></thead><tbody id="performanceTbody"></tbody></table>
+    </div>
+
+    <!-- Onboarding -->
+    <div id="onboardingTab" class="tab-content">
+      <h2>Onboarding</h2>
+      <table><thead><tr><th>Name</th><th>Checklist</th></tr></thead><tbody id="onboardTbody"></tbody></table>
+    </div>
+
+    <!-- Timesheets -->
+    <div id="timesheetTab" class="tab-content">
+      <h2>Timesheets</h2>
+      <table><thead><tr><th>Name</th><th>Hours</th><th>Week</th></tr></thead><tbody id="timesheetTbody"></tbody></table>
+    </div>
+
+    <!-- Learning -->
+    <div id="learningTab" class="tab-content">
+      <h2>Learning</h2>
+      <table><thead><tr><th>Name</th><th>Course</th><th>Status</th></tr></thead><tbody id="learningTbody"></tbody></table>
+    </div>
+
+    <!-- Shifts -->
+    <div id="shiftTab" class="tab-content">
+      <h2>Shift Scheduling</h2>
+      <table><thead><tr><th>Name</th><th>Shift</th></tr></thead><tbody id="shiftTbody"></tbody></table>
+    </div>
+
+    <!-- Cases -->
+    <div id="caseTab" class="tab-content">
+      <h2>Case Management</h2>
+      <form id="caseForm">
+        <input id="case_area" placeholder="Area" required>
+        <input id="case_name" placeholder="Case" required>
+        <input id="case_employees" placeholder="Employee(s) Involved" required>
+        <input id="case_officer" placeholder="Grievance Officer" required>
+        <button type="submit">Add Case</button>
+      </form>
+      <table>
+        <thead><tr><th>Case</th><th>Area</th><th>Status</th></tr></thead>
+        <tbody id="caseTbody"></tbody>
+      </table>
+    </div>
+
+    <div class="watermark">Designed & Developed By : Edwin Angelo Catequista</div>
+  </div>
+
+  <!-- Employee Modal -->
+  <div id="employeeModal" class="modal">
+    <div class="modal-content">
+      <span class="closeBtn" id="closeModal">&times;</span>
+      <h2>About This Employee</h2>
+      <div id="employeeDetails"></div>
+      <div>
+        <h3>Uploaded Files</h3>
+        <input type="file" id="fileUpload">
+        <ul id="fileList"></ul>
+      </div>
+      <div class="modal-actions">
+        <button id="editBtn">✏️ Edit</button>
+        <button id="deleteBtn">🗑️ Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Case Modal -->
+  <div id="caseModal" class="modal">
+    <div class="modal-content">
+      <span class="closeBtn" id="closeCaseModal">&times;</span>
+      <h2>Case Details</h2>
+      <div id="caseDetails"></div>
+    </div>
+  </div>
+
+  <script>
+    // ====== AUTH CHECK ======
+    if (!sessionStorage.getItem("loggedIn")) {
+      window.location.href = "index.html";
+    }
+
+    // ====== DATA ======
+    let employees = JSON.parse(localStorage.getItem("employees")) || [
+      { id:1, first:"Edwin Angelo", last:"Catequista", email:"edwin@company.com", role:"Developer", attendance:"Present", reports:5, kpi:88, shift:"Morning", course:"Leadership 101", courseStatus:"Completed", files:[] },
+      { id:2, first:"Jay Ryan", last:"Lim", email:"jay@company.com", role:"IT Head", attendance:"Absent", reports:8, kpi:92, shift:"Night", course:"Agile Training", courseStatus:"Ongoing", files:[] },
+      { id:3, first:"Maria", last:"Lopez", email:"maria@company.com", role:"HR Manager", attendance:"Late", reports:3, kpi:85, shift:"Afternoon", course:"HR Compliance", courseStatus:"Completed", files:[] },
+      { id:4, first:"John", last:"Doe", email:"john@company.com", role:"Accountant", attendance:"Present", reports:6, kpi:80, shift:"Morning", course:"Finance 101", courseStatus:"Completed", files:[] }
+    ];
+
+    let onboard = [
+      { name:"Chris Evans", checklist:"Completed" },
+      { name:"Scarlett Johansson", checklist:"Pending" }
+    ];
+
+    let cases = JSON.parse(localStorage.getItem("cases")) || [
+      { area:"Finance", case:"Payroll Issue", employees:"John Doe", officer:"Mr. Smith", status:"Open" },
+      { area:"HR", case:"Leave Dispute", employees:"Maria Lopez", officer:"Ms. Jane", status:"Closed" }
+    ];
+
+    // ====== DOM ======
+    const tabBtns=document.querySelectorAll(".tab-btn"), contents=document.querySelectorAll(".tab-content");
+    tabBtns.forEach(btn=>btn.onclick=()=>{tabBtns.forEach(b=>b.classList.remove("active"));btn.classList.add("active");contents.forEach(c=>c.classList.remove("active"));document.getElementById(btn.dataset.tab).classList.add("active");});
+    const logoutBtn=document.getElementById("logoutBtn"), loader=document.getElementById("loader");
+    logoutBtn.onclick=()=>{loader.classList.add("active");setTimeout(()=>{sessionStorage.removeItem("loggedIn");window.location.href="index.html";},1500);};
+
+    const tbody=document.querySelector("#employeeTable tbody");
+    function renderEmployees(list=employees){tbody.innerHTML="";list.forEach(e=>{let tr=document.createElement("tr");tr.innerHTML=`<td>${e.id}</td><td>${e.first} ${e.last}</td><td>${e.email}</td><td>${e.role}</td>`;tr.onclick=()=>openEmployeeModal(e);tbody.appendChild(tr);});}
+    renderEmployees();
+
+    // search
+    document.getElementById("searchBtn").onclick=()=>{
+      const q=document.getElementById("search").value.toLowerCase();
+      const filtered=employees.filter(e=>(e.first+" "+e.last).toLowerCase().includes(q) || e.email.toLowerCase().includes(q) || e.role.toLowerCase().includes(q));
+      renderEmployees(filtered);
+    };
+
+    // add employee
+    document.getElementById("employeeForm").onsubmit=e=>{
+      e.preventDefault();
+      let emp={
+        id:employees.length?employees[employees.length-1].id+1:1,
+        first:first_name.value,last:last_name.value,email:email.value,role:role.value,salary:salary.value,date_hired:date_hired.value,
+        attendance:"Present",reports:0,kpi:0,shift:"Morning",course:"",courseStatus:"Pending",files:[]
+      };
+      employees.push(emp);
+      localStorage.setItem("employees",JSON.stringify(employees));
+      renderEmployees();
+      e.target.reset();
+    };
+
+    // populate other tables
+    const dbTbody=document.getElementById("dbTbody"), attTbody=document.getElementById("attendanceTbody"), perfTbody=document.getElementById("performanceTbody"), onboardTbody=document.getElementById("onboardTbody"), timesheetTbody=document.getElementById("timesheetTbody"), learnTbody=document.getElementById("learningTbody"), shiftTbody=document.getElementById("shiftTbody"), reportsTbody=document.getElementById("reportsTbody");
+    function renderAll(){
+      dbTbody.innerHTML=employees.map(e=>`<tr><td>${e.id}</td><td>${e.first} ${e.last}</td><td>${e.email}</td><td>${e.role}</td></tr>`).join("");
+      attTbody.innerHTML=employees.map(e=>`<tr><td>${e.first} ${e.last}</td><td>${e.attendance}</td></tr>`).join("");
+      perfTbody.innerHTML=employees.map(e=>`<tr><td>${e.first} ${e.last}</td><td>${e.kpi}</td><td>${e.kpi>85?"Excellent":"Needs Improvement"}</td></tr>`).join("");
+      onboardTbody.innerHTML=onboard.map(o=>`<tr><td>${o.name}</td><td>${o.checklist}</td></tr>`).join("");
+      timesheetTbody.innerHTML=employees.map(e=>`<tr><td>${e.first} ${e.last}</td><td>${Math.floor(Math.random()*40)+20}</td><td>Week ${Math.floor(Math.random()*4)+1}</td></tr>`).join("");
+      learnTbody.innerHTML=employees.map(e=>`<tr><td>${e.first} ${e.last}</td><td>${e.course}</td><td>${e.courseStatus}</td></tr>`).join("");
+      shiftTbody.innerHTML=employees.map(e=>`<tr><td>${e.first} ${e.last}</td><td>${e.shift}</td></tr>`).join("");
+      reportsTbody.innerHTML=employees.map(e=>`<tr><td>${e.first} ${e.last}</td><td>${e.attendance}</td><td>${e.reports}</td></tr>`).join("");
+    }
+    renderAll();
+
+    // ===== EMPLOYEE MODAL =====
+    const employeeModal=document.getElementById("employeeModal"), closeModal=document.getElementById("closeModal"), details=document.getElementById("employeeDetails"), fileUpload=document.getElementById("fileUpload"), fileList=document.getElementById("fileList");
+    let currentEmployee=null;
+    function openEmployeeModal(e){
+      currentEmployee=e;
+      details.innerHTML=`
+        <div class="info"><span>ID:</span> ${e.id}</div>
+        <div class="info"><span>Name:</span> ${e.first} ${e.last}</div>
+        <div class="info"><span>Email:</span> ${e.email}</div>
+        <div class="info"><span>Role:</span> ${e.role}</div>
+        <div class="info"><span>Salary:</span> ${e.salary||"N/A"}</div>
+        <div class="info"><span>Date Hired:</span> ${e.date_hired||"N/A"}</div>
+      `;
+      renderFiles();
+      employeeModal.style.display="flex";
+    }
+    closeModal.onclick=()=>employeeModal.style.display="none";
+
+    // files
+    fileUpload.onchange=()=>{
+      const file=fileUpload.files[0];
+      if(file){
+        const reader=new FileReader();
+        reader.onload=()=>{
+          currentEmployee.files.push({name:file.name,data:reader.result});
+          localStorage.setItem("employees",JSON.stringify(employees));
+          renderFiles();
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    function renderFiles(){
+      fileList.innerHTML=currentEmployee.files.map((f,i)=>`<li><a href="${f.data}" target="_blank">${f.name}</a></li>`).join("");
+    }
+
+    // delete employee
+    document.getElementById("deleteBtn").onclick=()=>{
+      employees=employees.filter(e=>e.id!==currentEmployee.id);
+      localStorage.setItem("employees",JSON.stringify(employees));
+      renderEmployees();renderAll();
+      employeeModal.style.display="none";
+    };
+
+    // ===== CASES =====
+    const caseTbody=document.getElementById("caseTbody"), caseForm=document.getElementById("caseForm"), caseModal=document.getElementById("caseModal"), closeCaseModal=document.getElementById("closeCaseModal"), caseDetails=document.getElementById("caseDetails");
+    function renderCases(){
+      caseTbody.innerHTML="";
+      cases.forEach(c=>{
+        let tr=document.createElement("tr");
+        tr.innerHTML=`<td>${c.case}</td><td>${c.area}</td><td>${c.status}</td>`;
+        tr.onclick=()=>{caseDetails.innerHTML=`<div class="info"><span>Case:</span> ${c.case}</div><div class="info"><span>Area:</span> ${c.area}</div><div class="info"><span>Employees:</span> ${c.employees}</div><div class="info"><span>Officer:</span> ${c.officer}</div><div class="info"><span>Status:</span> ${c.status}</div>`;caseModal.style.display="flex";};
+        caseTbody.appendChild(tr);
+      });
+      localStorage.setItem("cases",JSON.stringify(cases));
+    }
+    renderCases();
+    caseForm.onsubmit=e=>{
+      e.preventDefault();
+      let c={area:case_area.value, case:case_name.value, employees:case_employees.value, officer:case_officer.value, status:"Open"};
+      cases.push(c);renderCases();caseForm.reset();
+    };
+    closeCaseModal.onclick=()=>caseModal.style.display="none";
+  </script>
+</body>
+</html>
